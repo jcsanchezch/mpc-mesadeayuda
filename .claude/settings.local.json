@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find d:Files_Dev_Phpmpc-mesadeayudaappHttpControllersAuth -type f -name *.php)"
+    ]
+  }
+}

@@ -16,10 +16,22 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
+        $user = $request->user();
+
+        $secciones = [];
+        if ($user) {
+            foreach (['mis_tickets', 'mesa_servicio', 'reportes', 'admin'] as $permiso) {
+                if ($user->hasPermissionTo($permiso, 'web')) {
+                    $secciones[] = $permiso;
+                }
+            }
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user()?->only('name', 'email'),
+                'user' => $user?->only('name', 'email'),
+                'secciones' => $secciones,
             ],
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),

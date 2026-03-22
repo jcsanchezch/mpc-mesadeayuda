@@ -1,95 +1,75 @@
 <script setup>
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
 
-defineProps({
-    logoutUrl: { type: String, required: true },
-    permissions: { type: Array, default: () => [] },
-    roles: { type: Array, default: () => [] },
-});
+const page      = usePage();
+const secciones = computed(() => page.props.auth.secciones ?? []);
 
-const page = usePage();
+const seccionConfig = {
+    mis_tickets:   { titulo: 'Mis Tickets',      descripcion: 'Revisa y da seguimiento a los tickets que has generado.',             ruta: '/mis-tickets',   color: 'teal'  },
+    mesa_servicio: { titulo: 'Mesa de Servicio',  descripcion: 'Gestiona solicitudes entrantes, clasifica y asigna tickets.',         ruta: '/mesa-servicio', color: 'blue'  },
+    reportes:      { titulo: 'Reportes',           descripcion: 'Genera y exporta reportes de atención y análisis de capacitaciones.', ruta: '/reportes',      color: 'amber' },
+    admin:         { titulo: 'Administración',     descripcion: 'Gestiona usuarios, trabajadores y configuración del sistema.',        ruta: '/admin',         color: 'rose'  },
+};
+
+const colorCard = {
+    teal:  { badge: 'bg-teal-50 text-teal-700 border-teal-200',   btn: 'bg-teal-600 text-white hover:bg-teal-700',   icon: 'text-teal-500'  },
+    blue:  { badge: 'bg-blue-50 text-blue-700 border-blue-200',   btn: 'bg-blue-600 text-white hover:bg-blue-700',   icon: 'text-blue-500'  },
+    amber: { badge: 'bg-amber-50 text-amber-700 border-amber-200', btn: 'bg-amber-500 text-white hover:bg-amber-600', icon: 'text-amber-500' },
+    rose:  { badge: 'bg-rose-50 text-rose-700 border-rose-200',   btn: 'bg-rose-600 text-white hover:bg-rose-700',   icon: 'text-rose-500'  },
+};
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <AppLayout title="Inicio">
+        <main class="p-8">
 
-    <main class="min-h-screen bg-stone-950 px-6 py-10 text-stone-100">
-        <div class="mx-auto max-w-5xl space-y-8">
-            <header class="flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl shadow-black/20 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.3em] text-teal-300">Acceso activo</p>
-                    <h1 class="mt-3 text-3xl font-semibold tracking-tight">Bienvenido, {{ page.props.auth.user?.name }}</h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-stone-300">
-                        El sistema esta configurado para ingreso por usuarios creados internamente. No hay registro publico ni recuperacion automatica de contrasena.
-                    </p>
-                </div>
-
-                <Link
-                    :href="logoutUrl"
-                    class="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
-                >
-                    Ir a cierre de sesion
-                </Link>
+            <!-- Encabezado -->
+            <header class="mb-8">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-stone-400">Panel de control</p>
+                <h1 class="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+                    Bienvenido, {{ page.props.auth.user?.name }}
+                </h1>
+                <p class="mt-1 text-sm text-stone-400">Selecciona una sección para comenzar.</p>
             </header>
 
-            <section class="grid gap-6 lg:grid-cols-2">
-                <article class="rounded-3xl border border-white/10 bg-white p-8 text-stone-900 shadow-lg shadow-black/10">
-                    <p class="text-sm font-semibold uppercase tracking-[0.25em] text-teal-700">Rol actual</p>
-                    <div class="mt-5 flex flex-wrap gap-3">
-                        <span
-                            v-for="role in roles"
-                            :key="role"
-                            class="rounded-full bg-teal-100 px-4 py-2 text-sm font-semibold text-teal-800"
-                        >
-                            {{ role }}
-                        </span>
-                        <span
-                            v-if="roles.length === 0"
-                            class="rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600"
-                        >
-                            Sin roles asignados
-                        </span>
-                    </div>
-                </article>
+            <!-- Sin secciones -->
+            <div
+                v-if="secciones.length === 0"
+                class="rounded-xl border border-stone-200 bg-white p-10 text-center text-sm text-stone-400 shadow-sm"
+            >
+                Tu cuenta no tiene secciones asignadas. Contacta al administrador del sistema.
+            </div>
 
-                <article class="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-lg shadow-black/10">
-                    <p class="text-sm font-semibold uppercase tracking-[0.25em] text-amber-300">Permisos disponibles</p>
-                    <div class="mt-5 flex flex-wrap gap-3">
-                        <span
-                            v-for="permission in permissions"
-                            :key="permission"
-                            class="rounded-full border border-amber-300/30 bg-amber-300/10 px-4 py-2 text-sm font-medium text-amber-100"
-                        >
-                            {{ permission }}
-                        </span>
-                        <span
-                            v-if="permissions.length === 0"
-                            class="rounded-full border border-stone-300/20 bg-white/5 px-4 py-2 text-sm font-medium text-stone-300"
-                        >
-                            Sin permisos asignados
-                        </span>
-                    </div>
-                </article>
-            </section>
-
-            <section class="rounded-3xl border border-teal-400/20 bg-teal-400/10 p-8 shadow-lg shadow-black/10">
-                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <!-- Tarjetas -->
+            <section v-else class="grid gap-5 sm:grid-cols-2">
+                <article
+                    v-for="key in secciones"
+                    :key="key"
+                    class="flex flex-col justify-between gap-5 rounded-xl border border-stone-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+                >
                     <div>
-                        <p class="text-sm font-semibold uppercase tracking-[0.25em] text-teal-200">Resumen de sesion</p>
-                        <p class="mt-3 text-lg font-semibold text-white">{{ page.props.auth.user?.email }}</p>
-                        <p class="mt-2 text-sm leading-6 text-stone-300">
-                            Desde aqui puedes validar tu acceso actual y salir del sistema de manera segura cuando termines.
+                        <span
+                            class="inline-block rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-widest"
+                            :class="colorCard[seccionConfig[key].color].badge"
+                        >
+                            {{ seccionConfig[key].titulo }}
+                        </span>
+                        <p class="mt-3 text-sm leading-6 text-stone-500">
+                            {{ seccionConfig[key].descripcion }}
                         </p>
                     </div>
-
                     <Link
-                        :href="logoutUrl"
-                        class="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-teal-100"
+                        :href="seccionConfig[key].ruta"
+                        class="inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition"
+                        :class="colorCard[seccionConfig[key].color].btn"
                     >
-                        Cerrar sesion
+                        Ir a {{ seccionConfig[key].titulo }}
                     </Link>
-                </div>
+                </article>
             </section>
-        </div>
-    </main>
+
+        </main>
+    </AppLayout>
 </template>

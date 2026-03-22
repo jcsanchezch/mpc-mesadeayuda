@@ -17,9 +17,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return Inertia::render('Auth/Login', [
-            'loginUrl' => route('login.store'),
-        ]);
+        return Inertia::render('Auth/Login');
     }
 
     public function store(Request $request): RedirectResponse

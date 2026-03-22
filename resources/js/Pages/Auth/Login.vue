@@ -1,10 +1,6 @@
 <script setup>
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 
-defineProps({
-    loginUrl: { type: String, required: true },
-});
-
 const page = usePage();
 
 const form = useForm({
@@ -13,8 +9,8 @@ const form = useForm({
     remember: false,
 });
 
-const submit = (loginUrl) => {
-    form.post(loginUrl, {
+const submit = () => {
+    form.post(route('login.store'), {
         onFinish: () => form.reset('password'),
     });
 };
@@ -42,7 +38,7 @@ const submit = (loginUrl) => {
                 {{ page.props.flash.status }}
             </div>
 
-            <form class="space-y-5" @submit.prevent="submit(loginUrl)">
+            <form class="space-y-5" @submit.prevent="submit">
                 <div>
                     <label for="email" class="mb-2 block text-sm font-medium text-stone-700">Correo electronico</label>
                     <input
