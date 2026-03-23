@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="es">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title inertia>{{ config('app.name', 'Mesa de Ayuda') }}</title>
-        @routes
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @inertiaHead
-    </head>
-    <body class="min-h-screen bg-stone-100 text-stone-900 antialiased">
-        @inertia
-    </body>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <link rel="shortcut icon" href="{{ asset('img/icon.png?v='.time()) }}" type="image/png" />
+    <title>{{ config('app.name') }}</title>
+    @routes('web')
+    @vite(['resources/js/app.js', 'resources/css/app.css'])
+    @inertiaHead
+</head>
+<body class="font-sans antialiased">
+    @inertia
+</body>
 </html>

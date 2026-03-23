@@ -11,105 +11,79 @@ class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // ----------------------------------------------------------------
-        // PERMISOS
-        // ----------------------------------------------------------------
-        // Secciones (acceso a cada módulo del sistema)
         $permisos = [
-            // --- Sección: Mis Tickets ---
-            'mis_tickets',            // acceso a sección
-            'ticket.crear',    // crear ticket para sí mismo
-            'ticket.conformidad',     // dar conformidad a un ticket resuelto
-
-            // --- Sección: Mesa de Servicio ---
-            'mesa_servicio',          // acceso a sección
-            'ticket.crear_mesa',      // crear ticket por cualquier canal (presencial, correo, SGD, otro)
-            'ticket.clasificar',      // clasificar tipo y prioridad
-            'ticket.asignar',         // asignar profesional responsable
-
-            // --- Acciones de Profesional (sin sección propia) ---
-            'ticket.atender',         // registrar avances en la atención
-            'ticket.solicitar_info',  // solicitar información adicional al usuario
-            'ticket.transferir',      // transferir el ticket a otro profesional
-            'ticket.resolver',        // marcar ticket como resuelto
-
-            // --- Sección: Reportes ---
-            'reportes',               // acceso a sección
-            'reporte.generar',        // generar y exportar reportes
-
-            // --- Sección: Administración ---
-            'admin',                  // acceso a sección
-            'usuario.gestionar',      // alta, edición y baja de usuarios y trabajadores
+            // Tickets - Mesa de Servicio
+            'tickets.crear',
+            'tickets.clasificar',
+            'tickets.asignar',
+            'tickets.reasignar',
+            'tickets.solicitar_informacion',
+            'tickets.cancelar',
+            'tickets.actualizar',
+            // Tickets - Especialista
+            'tickets.registrar_inicio_atencion',
+            'tickets.cerrar',
+            'tickets.registrar_resolucion',
+            // Reportes
+            'reportes.reportes',
+            // Administración
+            'administracion.solicitantes',
+            'administracion.voluntarios',
+            'administracion.practicantes',
         ];
 
         foreach ($permisos as $permiso) {
-            Permission::findOrCreate($permiso, 'web');
+            Permission::firstOrCreate(['name' => $permiso, 'guard_name' => 'web']);
         }
 
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        // ----------------------------------------------------------------
-        // ROLES Y SUS PERMISOS
-        // ----------------------------------------------------------------
-        $roles = [
-
-            // Trabajador municipal que solicita servicios TI
-            'usuario' => [
-                'mis_tickets',
-                'ticket.crear',
-                'ticket.conformidad',
-            ],
-
-            // Personal TI que recibe y gestiona solicitudes en la mesa de servicio
-            'mesa_servicio' => [
-                'mis_tickets',
-                'ticket.crear',
-                'ticket.conformidad',
-                'mesa_servicio',
-                'ticket.crear_mesa',
-                'ticket.clasificar',
-                'ticket.asignar',
-            ],
-
-            // Técnico TI asignado para atender tickets
-            'profesional' => [
-                'mis_tickets',
-                'ticket.crear',
-                'ticket.conformidad',
-                'ticket.atender',
-                'ticket.solicitar_info',
-                'ticket.transferir',
-                'ticket.resolver',
-            ],
-
-            // Jefe / coordinador OTI: puede hacer todo lo anterior + reportes
-            'coordinador' => [
-                'mis_tickets',
-                'ticket.crear',
-                'ticket.conformidad',
-                'mesa_servicio',
-                'ticket.crear_mesa',
-                'ticket.clasificar',
-                'ticket.asignar',
-                'ticket.atender',
-                'ticket.solicitar_info',
-                'ticket.transferir',
-                'ticket.resolver',
-                'reportes',
-                'reporte.generar',
-            ],
-
-            // Administrador del sistema: acceso total
-            'admin' => $permisos,
+        $permisosMesaServicio = [
+            'tickets.crear',
+            'tickets.clasificar',
+            'tickets.asignar',
+            'tickets.reasignar',
+            'tickets.solicitar_informacion',
+            'tickets.cancelar',
+            'tickets.actualizar',
         ];
 
-        foreach ($roles as $nombre => $permisosList) {
-            $role = Role::findOrCreate($nombre, 'web');
-            $role->syncPermissions($permisosList);
-        }
+        $permisosEspecialista = [
+            'tickets.registrar_inicio_atencion',
+            'tickets.solicitar_informacion',
+            'tickets.cerrar',
+            'tickets.clasificar',
+            'tickets.registrar_resolucion',
+        ];
 
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $permisosCoordinador = array_unique(array_merge(
+            $permisosMesaServicio,
+            $permisosEspecialista,
+            ['reportes.reportes'],
+        ));
+
+        $permisosAdministrador = array_unique(array_merge(
+            $permisosCoordinador,
+            [
+                'administracion.solicitantes',
+                'administracion.voluntarios',
+                'administracion.practicantes',
+            ],
+        ));
+
+        Role::firstOrCreate(['name' => 'SOLICITANTE',    'guard_name' => 'web'])
+            ->syncPermissions([]);
+
+        Role::firstOrCreate(['name' => 'MESA_SERVICIO',  'guard_name' => 'web'])
+            ->syncPermissions($permisosMesaServicio);
+
+        Role::firstOrCreate(['name' => 'ESPECIALISTA',   'guard_name' => 'web'])
+            ->syncPermissions($permisosEspecialista);
+
+        Role::firstOrCreate(['name' => 'COORDINADOR',    'guard_name' => 'web'])
+            ->syncPermissions($permisosCoordinador);
+
+        Role::firstOrCreate(['name' => 'ADMINISTRADOR',  'guard_name' => 'web'])
+            ->syncPermissions($permisosAdministrador);
     }
 }

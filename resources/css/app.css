@@ -1,11 +1,57 @@
-@import 'tailwindcss';
+@import url("fonts/inter/inter.css");
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+
+
+@layer base {
+    html,
+    body {
+        @apply font-sans;
+    }
+}
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    border-radius: 0;
+    background: #aaa;
+}
+::-webkit-scrollbar-thumb {
+    background: #ee9024;
+    border-radius: 0;
+    outline: none;
+    margin: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #f5aa35;
+    border: none;
+}
+
+.odd > td {
+    border-top: 1px solid #eee !important;
+}
+.odd:hover > td {
+    background-color: #fffeec !important;
+}
+
+.even > td {
+    border-top: 1px solid #eee !important;
+    background-color: #fbfbfb !important;
+}
+.even:hover > td {
+    background-color: #fffeec !important;
+}
+
+.rounded-5px {
+    border-radius: 5px !important;
 }

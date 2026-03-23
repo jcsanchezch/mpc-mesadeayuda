@@ -1,0 +1,214 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class TrabajadoresSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // ── CARGOS ────────────────────────────────────────────────────────────
+        $cargos = [
+            'Especialista en Tecnologías de la Información',
+            'Analista de Sistemas',
+            'Técnico Administrativo',
+            'Especialista Administrativo',
+            'Abogado',
+            'Contador',
+            'Ingeniero Civil',
+            'Secretaria Ejecutiva',
+            'Auxiliar Administrativo',
+            'Coordinador de Servicios',
+            'Voluntario',
+        ];
+
+        foreach ($cargos as $nombre) {
+            DB::table('cargos')->insertOrIgnore(['nombre' => $nombre, 'activo' => true]);
+        }
+
+        $cargoId = fn(string $nombre) => DB::table('cargos')->where('nombre', $nombre)->value('id');
+        $depId   = fn(string $abrev)  => DB::table('dependencias')->where('abreviatura', $abrev)->value('id');
+
+        // ── TRABAJADORES ──────────────────────────────────────────────────────
+        $trabajadores = [
+            // CSANCHEZ — vinculado al usuario existente
+            [
+                'dni'            => '00000000',
+                'paterno'        => 'SANCHEZ',
+                'materno'        => 'CHUNQUE',
+                'nombres'        => 'JUAN CARLOS',
+                'cargo'          => 'Especialista en Tecnologías de la Información',
+                'dependencia'    => 'OTI',
+                'activo'         => true,
+                'vincular_user'  => 'CSANCHEZ',
+            ],
+            // 10 trabajadores de ejemplo
+            [
+                'dni'         => '45123678',
+                'paterno'     => 'RAMIREZ',
+                'materno'     => 'FLORES',
+                'nombres'     => 'JORGE LUIS',
+                'cargo'       => 'Analista de Sistemas',
+                'dependencia' => 'OTI',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '72345891',
+                'paterno'     => 'TORRES',
+                'materno'     => 'MENDEZ',
+                'nombres'     => 'ANA MARIA',
+                'cargo'       => 'Técnico Administrativo',
+                'dependencia' => 'OGAF',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '61234507',
+                'paterno'     => 'GUTIERREZ',
+                'materno'     => 'ROJAS',
+                'nombres'     => 'PEDRO ANTONIO',
+                'cargo'       => 'Especialista Administrativo',
+                'dependencia' => 'GM',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '48901234',
+                'paterno'     => 'VARGAS',
+                'materno'     => 'CASTILLO',
+                'nombres'     => 'LUCIA BEATRIZ',
+                'cargo'       => 'Abogado',
+                'dependencia' => 'OGAJ',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '53782019',
+                'paterno'     => 'DIAZ',
+                'materno'     => 'PAREDES',
+                'nombres'     => 'ROBERTO CARLOS',
+                'cargo'       => 'Contador',
+                'dependencia' => 'OC',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '40128756',
+                'paterno'     => 'MORALES',
+                'materno'     => 'QUISPE',
+                'nombres'     => 'ELENA ROSA',
+                'cargo'       => 'Secretaria Ejecutiva',
+                'dependencia' => 'OGPP',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '76543210',
+                'paterno'     => 'HUANCA',
+                'materno'     => 'MAMANI',
+                'nombres'     => 'FELIX RAUL',
+                'cargo'       => 'Ingeniero Civil',
+                'dependencia' => 'GIP',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '68901345',
+                'paterno'     => 'LEON',
+                'materno'     => 'VEGA',
+                'nombres'     => 'CARMEN SOFIA',
+                'cargo'       => 'Auxiliar Administrativo',
+                'dependencia' => 'ORCP',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '59234781',
+                'paterno'     => 'RAMOS',
+                'materno'     => 'SILVA',
+                'nombres'     => 'MIGUEL ANGEL',
+                'cargo'       => 'Coordinador de Servicios',
+                'dependencia' => 'OMAC',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '47890123',
+                'paterno'     => 'CHÁVEZ',
+                'materno'     => 'LUNA',
+                'nombres'     => 'PATRICIA ISABEL',
+                'cargo'       => 'Técnico Administrativo',
+                'dependencia' => 'OPM',
+                'activo'      => true,
+            ],
+            // 3 trabajadores con cargo Voluntario
+            [
+                'dni'         => '80123456',
+                'paterno'     => 'CONDORI',
+                'materno'     => 'APAZA',
+                'nombres'     => 'JUAN PABLO',
+                'cargo'       => 'Voluntario',
+                'dependencia' => 'OTI',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '81234567',
+                'paterno'     => 'QUISPE',
+                'materno'     => 'CCAMA',
+                'nombres'     => 'MARIA ELENA',
+                'cargo'       => 'Voluntario',
+                'dependencia' => 'OGAF',
+                'activo'      => true,
+            ],
+            [
+                'dni'         => '82345678',
+                'paterno'     => 'MAMANI',
+                'materno'     => 'HUANCA',
+                'nombres'     => 'CARLOS DAVID',
+                'cargo'       => 'Voluntario',
+                'dependencia' => 'GM',
+                'activo'      => true,
+            ],
+        ];
+
+        foreach ($trabajadores as $data) {
+            $id = DB::table('trabajadores')->updateOrInsert(
+                ['dni' => $data['dni']],
+                [
+                    'dependencia_id' => $depId($data['dependencia']),
+                    'cargo_id'       => $cargoId($data['cargo']),
+                    'dni'            => $data['dni'],
+                    'paterno'        => $data['paterno'],
+                    'materno'        => $data['materno'],
+                    'nombres'        => $data['nombres'],
+                    'activo'         => $data['activo'],
+                ]
+            );
+
+            // Vincular con usuario existente si corresponde
+            if (!empty($data['vincular_user'])) {
+                $trabajadorId = DB::table('trabajadores')->where('dni', $data['dni'])->value('id');
+                DB::table('users')
+                    ->where('usuario', $data['vincular_user'])
+                    ->update(['trabajador_id' => $trabajadorId]);
+            }
+        }
+
+        // ── ESPECIALISTAS ─────────────────────────────────────────────────────
+        // 4 especialistas: 2 regulares + 2 voluntarios
+        $especialistas = [
+            ['dni' => '45123678', 'vinculo_laboral' => true],  // RAMIREZ - Analista Sistemas
+            ['dni' => '53782019', 'vinculo_laboral' => true],  // DIAZ - Contador
+            ['dni' => '80123456', 'vinculo_laboral' => false], // CONDORI - Voluntario
+            ['dni' => '81234567', 'vinculo_laboral' => false], // QUISPE - Voluntario
+        ];
+
+        foreach ($especialistas as $esp) {
+            $trabajadorId = DB::table('trabajadores')->where('dni', $esp['dni'])->value('id');
+            if ($trabajadorId) {
+                DB::table('especialistas')->updateOrInsert(
+                    ['trabajador_id' => $trabajadorId],
+                    [
+                        'trabajador_id'  => $trabajadorId,
+                        'vinculo_laboral' => $esp['vinculo_laboral'],
+                        'activo'         => true,
+                    ]
+                );
+            }
+        }
+    }
+}
