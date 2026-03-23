@@ -22,13 +22,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'usuario',
-        'dni',
-        'paterno',
-        'materno',
-        'nombres',
-        'activo',
+        'usuario', 'trabajador_id',
+        'dni', 'paterno', 'materno', 'nombres', 'activo',
     ];
+
+    public function trabajador() { return $this->belongsTo(Trabajador::class); }
 
     /**
      * The attributes that should be hidden for serialization.

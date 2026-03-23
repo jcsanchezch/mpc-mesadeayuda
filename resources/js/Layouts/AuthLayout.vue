@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import Dropdown from "@/Components/Dropdown.vue";
 import Siderbar from "@/Layouts/Siderbar.vue";
@@ -7,7 +7,11 @@ import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from "@headlessu
 import { route } from "ziggy-js";
 
 const sidebarOpen = ref(false);
-const collapsed = ref(false);
+const collapsed = ref(localStorage.getItem('sidebar-collapsed') === 'true');
+
+watch(collapsed, (val) => {
+    localStorage.setItem('sidebar-collapsed', val);
+});
 </script>
 
 <template>
@@ -49,9 +53,9 @@ const collapsed = ref(false);
         <!-- Sidebar escritorio -->
         <div :class="[
             'hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out',
-            collapsed ? 'lg:w-16' : 'lg:w-64'
+            collapsed ? 'lg:w-12' : 'lg:w-64'
         ]">
-            <div class="flex grow flex-col overflow-y-auto overflow-x-hidden bg-gray-100 px-2">
+            <div class="flex grow flex-col overflow-y-auto overflow-x-hidden bg-gray-100">
                 <Siderbar :collapsed="collapsed" />
             </div>
         </div>

@@ -1,6 +1,6 @@
-# Seguimiento y Control de Expedientes
+# Mesa de Ayuda
 
 ## Funcionalidades
 
-- Consulta de documentos de un Expediente
+- Creación de Tickets
 

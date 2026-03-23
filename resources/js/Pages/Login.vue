@@ -24,7 +24,7 @@ const submit = () => {
                 <img :src="logoImage" class="w-48" alt="Logo" />
                 <div
                     class="mt-2 px-8 py-4 text-center inline-block text-[24px] font-bold tracking-normal rounded-5px bg-cyan-100 border-b-2 border-b-cyan-200  text-sky-700 leading-none">
-                    Mesa de Ayuda
+                    Mesa de Servicio
                 </div>
             </div>
             <div class="mt-10">

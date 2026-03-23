@@ -9,10 +9,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('dependencias', function (Blueprint $table) {
-            $table->id(); $table->string('nombre', 255);
+            $table->id();
+            $table->string('nombre', 255);
             $table->string('abreviatura', 20)->nullable();
             $table->boolean('activo')->default(true);
             $table->unsignedBigInteger('origen_id')->nullable()->unique()->comment('ID original en la BD principal de origen');
+            // responsable_id se añade después de crear trabajadores (dependencia circular)
+            $table->timestamps(0);
+        });
+
+        Schema::create('locales', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 255);
+            $table->string('direccion', 200)->nullable();
+            $table->boolean('principal')->default(false);
+            $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
 
@@ -23,24 +34,42 @@ return new class extends Migration
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
+        /*
+        GERENTE MUNICIPAL, GERENTE MUNICIPAL (E)
+        DIRECTOR, DIRECTOR (E)
+        GERENTE, GERENTE (E)
+        SUBGERENTE, SUBGERENTE (E)
+        JEFE, JEFE(E)
+        TI,
+        TRABAJADOR
+        */
 
         Schema::create('trabajadores', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('origen_id')->nullable()->unique()->comment('ID original en la BD principal de origen');
             $table->foreignId('dependencia_id')->constrained('dependencias');
             $table->foreignId('cargo_id')->constrained('cargos');
+            $table->foreignId('local_id')->nullable()->constrained('locales')->nullOnDelete();
             $table->string('dni', 10)->unique();
             $table->string('paterno', 100);
             $table->string('materno', 100);
             $table->string('nombres', 100);
+            $table->string('celular', 15)->nullable();
             $table->boolean('activo')->default(true);
+            $table->unsignedBigInteger('origen_id')->nullable()->unique()->comment('ID original en la BD principal de origen');
             $table->timestamps(0);
+        });
+
+        // Referencia circular resuelta: dependencias ← trabajadores
+        Schema::table('dependencias', function (Blueprint $table) {
+            $table->foreignId('responsable_id')->nullable()->after('activo')
+                ->constrained('trabajadores')->nullOnDelete();
         });
 
         Schema::create('especialistas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('trabajador_id')->constrained('trabajadores');
             $table->boolean('vinculo_laboral')->default(false);
+            $table->boolean('voluntario')->default(false);
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
@@ -62,6 +91,19 @@ return new class extends Migration
             $table->timestamps(0);
         });
 
+
+        Schema::create('niveles', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedTinyInteger('nivel')->unique()
+                  ->comment('Tier ITIL 4 — 0: Autoservicio, 1: Mesa de Servicios, 2: Soporte Técnico, 3: Soporte Experto, 4: Proveedor Externo');
+            $table->string('nombre', 10)->unique()
+                  ->comment('Código corto: N0, N1, N2, N3, N4');
+            $table->string('label', 150);
+            $table->text('descripcion')->nullable();
+            $table->boolean('activo')->default(true);
+            $table->timestamps(0);
+        });
+
         Schema::create('servicios', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 300);
@@ -75,7 +117,8 @@ return new class extends Migration
         Schema::create('especialistas_servicios', function (Blueprint $table) {
             $table->foreignId('especialista_id')->constrained('especialistas')->cascadeOnDelete();
             $table->foreignId('servicio_id')->constrained('servicios')->cascadeOnDelete();
-            $table->unsignedTinyInteger('nivel')->default(2)->comment('Nivel de atención: 2 o 3');
+            $table->foreignId('categoria_id')->constrained('categorias');
+            $table->foreignId('nivel_id')->constrained('niveles');
             $table->boolean('activo')->default(true);
             $table->primary(['especialista_id', 'servicio_id']);
         });
@@ -98,15 +141,45 @@ return new class extends Migration
             $table->timestamps(0);
         });
 
+        Schema::create('prioridades', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 50)->unique();
+            $table->string('label', 100);
+            $table->boolean('activo')->default(true);
+            $table->timestamps(0);
+        });
+
+        Schema::create('canales', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 50)->unique();
+            $table->string('label', 100);
+            $table->boolean('activo')->default(true);
+            $table->timestamps(0);
+        });
+
+        Schema::create('dificultades', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedTinyInteger('nivel')->unique()->comment('Orden ascendente: 1=más simple, 5=más complejo');
+            $table->string('nombre', 30)->unique();
+            $table->string('label', 100);
+            $table->string('color', 10)->default('#6b7280');
+            $table->boolean('activo')->default(true);
+            $table->timestamps(0);
+        });
+
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->string('codigo', 20)->unique();
             $table->foreignId('solicitante_id')->constrained('users');
+
+            $table->foreignId('canal_id')->nullable()->constrained('canales')->nullOnDelete();
+            $table->foreignId('prioridad_id')->nullable()->constrained('prioridades')->nullOnDelete();
+            $table->foreignId('dificultad_id')->nullable()->constrained('dificultades')->nullOnDelete();
             $table->foreignId('servicio_id')->nullable()->constrained('servicios')->nullOnDelete();
             $table->foreignId('especialista_id')->nullable()->constrained('especialistas')->nullOnDelete();
             $table->string('estado', 30)->default('EN_ESPERA');
-            // EN_ESPERA | ASIGNADO | PROGRAMADO | ATENDIENDO | INFORMACION | ATENDIDO | CANCELADO | CERRADO
             $table->string('asunto', 500);
+            $table->string('celular', 15)->nullable();
             $table->text('descripcion');
             $table->text('resolucion')->nullable();
             $table->text('motivo_cancelacion')->nullable();
@@ -121,6 +194,8 @@ return new class extends Migration
             $table->index('especialista_id');
             $table->index('ticket_padre_id');
         });
+
+
 
 
         Schema::create('tickets_historial', function (Blueprint $table) {
@@ -186,10 +261,15 @@ return new class extends Migration
         Schema::dropIfExists('tickets_archivos');
         Schema::dropIfExists('formatos');
         Schema::dropIfExists('archivos');
+        Schema::dropIfExists('tickets_historial');
         Schema::dropIfExists('tickets');
+        Schema::dropIfExists('canales');
+        Schema::dropIfExists('dificultades');
+        Schema::dropIfExists('prioridades');
         Schema::dropIfExists('estados');
         Schema::dropIfExists('especialistas_servicios');
         Schema::dropIfExists('servicios');
+        Schema::dropIfExists('niveles');
         Schema::dropIfExists('tipos');
         Schema::dropIfExists('categorias');
         Schema::dropIfExists('especialistas');
@@ -197,9 +277,14 @@ return new class extends Migration
             $table->dropForeign(['trabajador_id']);
             $table->dropColumn('trabajador_id');
         });
+        // Soltar FK circular antes de dropear trabajadores y dependencias
+        Schema::table('dependencias', function (Blueprint $table) {
+            $table->dropForeign(['responsable_id']);
+            $table->dropColumn('responsable_id');
+        });
         Schema::dropIfExists('trabajadores');
+        Schema::dropIfExists('locales');
         Schema::dropIfExists('cargos');
         Schema::dropIfExists('dependencias');
-        Schema::dropIfExists('tickets_historial');
     }
 };

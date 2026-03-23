@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MesaServicio\TicketsController as MesadeayudaTicketsController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Solicitante\TicketsController;
 use Illuminate\Support\Facades\Route;
@@ -10,7 +11,14 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil');
+    Route::get('/perfil',  [PerfilController::class, 'index'])->name('perfil');
+    Route::put('/perfil',  [PerfilController::class, 'update'])->name('perfil.update');
+
+    Route::prefix('mesadeayuda')->name('mesadeayuda.')->group(function () {
+        Route::get('/tickets',            [MesadeayudaTicketsController::class, 'index'])->name('tickets.index');
+        Route::post('/tickets',           [MesadeayudaTicketsController::class, 'crearTicket'])->name('tickets.crear');
+        Route::get('/trabajadores/buscar',[MesadeayudaTicketsController::class, 'buscarTrabajador'])->name('trabajadores.buscar');
+    });
 
     Route::prefix('solicitante')->name('solicitante.')->group(function () {
         Route::get('/',                              [TicketsController::class,      'index'])->name('index');
