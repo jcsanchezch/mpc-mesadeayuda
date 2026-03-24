@@ -9,28 +9,8 @@ class TrabajadoresSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── CARGOS ────────────────────────────────────────────────────────────
-        $cargos = [
-            'Especialista en Tecnologías de la Información',
-            'Analista de Sistemas',
-            'Técnico Administrativo',
-            'Especialista Administrativo',
-            'Abogado',
-            'Contador',
-            'Ingeniero Civil',
-            'Secretaria Ejecutiva',
-            'Auxiliar Administrativo',
-            'Coordinador de Servicios',
-            'Voluntario',
-        ];
-
-        foreach ($cargos as $nombre) {
-            DB::table('cargos')->insertOrIgnore(['nombre' => $nombre, 'activo' => true]);
-        }
-
-        $cargoId  = fn(string $nombre) => DB::table('cargos')->where('nombre', $nombre)->value('id');
-        $depId    = fn(string $abrev)  => DB::table('dependencias')->where('abreviatura', $abrev)->value('id');
-        $localId  = fn(string $nombre) => DB::table('locales')->where('nombre', $nombre)->value('id');
+        $depId   = fn(string $abrev)  => DB::table('dependencias')->where('abreviatura', $abrev)->value('id');
+        $localId = fn(string $nombre) => DB::table('locales')->where('nombre', $nombre)->value('id');
 
         // ── TRABAJADORES ──────────────────────────────────────────────────────
         $trabajadores = [
@@ -41,7 +21,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'       => 'SANCHEZ',
                 'materno'       => 'CHUNQUE',
                 'nombres'       => 'JUAN CARLOS',
-                'cargo'         => 'Especialista en Tecnologías de la Información',
                 'dependencia'   => 'OTI',
                 'local'         => 'QHAPAC ÑAN',
                 'activo'        => true,
@@ -52,7 +31,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'RAMIREZ',
                 'materno'     => 'FLORES',
                 'nombres'     => 'JORGE LUIS',
-                'cargo'       => 'Analista de Sistemas',
                 'dependencia' => 'OTI',
                 'local'       => 'QHAPAC ÑAN',
                 'activo'      => true,
@@ -62,7 +40,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'TORRES',
                 'materno'     => 'MENDEZ',
                 'nombres'     => 'ANA MARIA',
-                'cargo'       => 'Técnico Administrativo',
                 'dependencia' => 'OGAF',
                 'local'       => 'QHAPAC ÑAN',
                 'activo'      => true,
@@ -72,7 +49,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'GUTIERREZ',
                 'materno'     => 'ROJAS',
                 'nombres'     => 'PEDRO ANTONIO',
-                'cargo'       => 'Especialista Administrativo',
                 'dependencia' => 'GM',
                 'local'       => 'QHAPAC ÑAN',
                 'activo'      => true,
@@ -82,7 +58,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'VARGAS',
                 'materno'     => 'CASTILLO',
                 'nombres'     => 'LUCIA BEATRIZ',
-                'cargo'       => 'Abogado',
                 'dependencia' => 'OGAJ',
                 'local'       => 'QHAPAC ÑAN',
                 'activo'      => true,
@@ -93,7 +68,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'DIAZ',
                 'materno'     => 'PAREDES',
                 'nombres'     => 'ROBERTO CARLOS',
-                'cargo'       => 'Contador',
                 'dependencia' => 'OC',
                 'local'       => 'CASA MIGUEL ESPINACH',
                 'activo'      => true,
@@ -103,7 +77,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'MORALES',
                 'materno'     => 'QUISPE',
                 'nombres'     => 'ELENA ROSA',
-                'cargo'       => 'Secretaria Ejecutiva',
                 'dependencia' => 'OGPP',
                 'local'       => 'CASA MIGUEL ESPINACH',
                 'activo'      => true,
@@ -114,7 +87,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'HUANCA',
                 'materno'     => 'MAMANI',
                 'nombres'     => 'FELIX RAUL',
-                'cargo'       => 'Ingeniero Civil',
                 'dependencia' => 'GIP',
                 'local'       => 'ESTADIO MUNICIPAL',
                 'activo'      => true,
@@ -124,7 +96,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'LEON',
                 'materno'     => 'VEGA',
                 'nombres'     => 'CARMEN SOFIA',
-                'cargo'       => 'Auxiliar Administrativo',
                 'dependencia' => 'ORCP',
                 'local'       => 'SERENAZGO',
                 'activo'      => true,
@@ -134,7 +105,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'RAMOS',
                 'materno'     => 'SILVA',
                 'nombres'     => 'MIGUEL ANGEL',
-                'cargo'       => 'Coordinador de Servicios',
                 'dependencia' => 'OMAC',
                 'local'       => 'CENTRO MEDICO MUNICIPAL',
                 'activo'      => true,
@@ -144,7 +114,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'CHÁVEZ',
                 'materno'     => 'LUNA',
                 'nombres'     => 'PATRICIA ISABEL',
-                'cargo'       => 'Técnico Administrativo',
                 'dependencia' => 'OPM',
                 'local'       => 'REAL PLAZA',
                 'activo'      => true,
@@ -154,7 +123,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'CONDORI',
                 'materno'     => 'APAZA',
                 'nombres'     => 'JUAN PABLO',
-                'cargo'       => 'Voluntario',
                 'dependencia' => 'OTI',
                 'local'       => 'POLICIA MUNICIPAL',
                 'activo'      => true,
@@ -164,7 +132,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'QUISPE',
                 'materno'     => 'CCAMA',
                 'nombres'     => 'MARIA ELENA',
-                'cargo'       => 'Voluntario',
                 'dependencia' => 'OGAF',
                 'local'       => 'MERCADO CENTRAL DE CAJAMARCA',
                 'activo'      => true,
@@ -174,7 +141,6 @@ class TrabajadoresSeeder extends Seeder
                 'paterno'     => 'MAMANI',
                 'materno'     => 'HUANCA',
                 'nombres'     => 'CARLOS DAVID',
-                'cargo'       => 'Voluntario',
                 'dependencia' => 'GM',
                 'local'       => 'CUNA JARDIN',
                 'activo'      => true,
@@ -186,7 +152,6 @@ class TrabajadoresSeeder extends Seeder
                 ['dni' => $data['dni']],
                 [
                     'dependencia_id' => $depId($data['dependencia']),
-                    'cargo_id'       => $cargoId($data['cargo']),
                     'local_id'       => isset($data['local']) ? $localId($data['local']) : null,
                     'dni'            => $data['dni'],
                     'paterno'        => $data['paterno'],
@@ -209,10 +174,10 @@ class TrabajadoresSeeder extends Seeder
         // ── ESPECIALISTAS ─────────────────────────────────────────────────────
         // 4 especialistas: 2 regulares + 2 voluntarios
         $especialistas = [
-            ['dni' => '45123678', 'vinculo_laboral' => true],  // RAMIREZ - Analista Sistemas
-            ['dni' => '53782019', 'vinculo_laboral' => true],  // DIAZ - Contador
-            ['dni' => '80123456', 'vinculo_laboral' => false], // CONDORI - Voluntario
-            ['dni' => '81234567', 'vinculo_laboral' => false], // QUISPE - Voluntario
+            ['dni' => '45123678', 'vinculo_laboral' => true],  // RAMIREZ
+            ['dni' => '53782019', 'vinculo_laboral' => true],  // DIAZ
+            ['dni' => '80123456', 'vinculo_laboral' => false], // CONDORI
+            ['dni' => '81234567', 'vinculo_laboral' => false], // QUISPE
         ];
 
         foreach ($especialistas as $esp) {
@@ -221,9 +186,9 @@ class TrabajadoresSeeder extends Seeder
                 DB::table('especialistas')->updateOrInsert(
                     ['trabajador_id' => $trabajadorId],
                     [
-                        'trabajador_id'  => $trabajadorId,
+                        'trabajador_id'   => $trabajadorId,
                         'vinculo_laboral' => $esp['vinculo_laboral'],
-                        'activo'         => true,
+                        'activo'          => true,
                     ]
                 );
             }

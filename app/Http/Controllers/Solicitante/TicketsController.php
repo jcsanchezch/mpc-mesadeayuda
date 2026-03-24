@@ -83,7 +83,7 @@ class TicketsController extends Controller
         ->orderBy('nombre')
         ->get(['id', 'nombre']);
 
-        $user       = Auth::user()->load('trabajador.cargo', 'trabajador.dependencia', 'trabajador.local');
+        $user       = Auth::user()->load('trabajador.dependencia', 'trabajador.local');
         $trabajador = $user->trabajador;
 
         return Inertia::render('Solicitante/Tickets/Index', [
@@ -92,7 +92,6 @@ class TicketsController extends Controller
             'categorias'  => $categorias,
             'solicitante' => [
                 'nombre'      => trim("{$user->dni} - {$user->paterno} {$user->materno} {$user->nombres}"),
-                'cargo'       => $trabajador?->cargo?->nombre,
                 'dependencia' => $trabajador?->dependencia?->nombre,
                 'local'       => $trabajador?->local?->nombre,
                 'celular'     => $trabajador?->celular,
@@ -120,10 +119,10 @@ class TicketsController extends Controller
         $year  = now()->year;
         $last  = Ticket::whereYear('created_at', $year)->orderByDesc('id')->value('codigo');
         $seq   = 1;
-        if ($last && preg_match('/TKT-\d{4}-(\d+)/', $last, $m)) {
+        if ($last && preg_match('/\d{4}-(\d+)/', $last, $m)) {
             $seq = (int) $m[1] + 1;
         }
-        $codigo = sprintf('TKT-%d-%05d', $year, $seq);
+        $codigo = sprintf('%d-%05d', $year, $seq);
 
         $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
         $canalMesa    = Canal::where('nombre', 'MESA_DE_AYUDA')->firstOrFail();

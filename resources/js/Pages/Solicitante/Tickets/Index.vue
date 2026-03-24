@@ -194,12 +194,7 @@ const estadoLabel = (estado) => ({
                         <input :value="solicitante.nombre" readonly
                             class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-5px py-2.5 px-2.5 text-sm cursor-default font-mono" />
                     </div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div>
-                            <InputLabel value="Cargo" />
-                            <input :value="solicitante.cargo ?? '—'" readonly
-                                class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-5px py-2.5 px-2.5 text-xs cursor-default truncate" />
-                        </div>
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
                             <InputLabel value="Dependencia" />
                             <input :value="solicitante.dependencia ?? '—'" readonly

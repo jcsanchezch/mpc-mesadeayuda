@@ -13,6 +13,7 @@ use App\Models\TicketArchivo;
 use App\Models\TicketHistorial;
 use App\Models\Trabajador;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -29,39 +30,39 @@ class TicketsController extends Controller
             'historial.user',
             'archivos.archivo',
         ])
-        ->whereNull('especialista_id')
-        ->latest()
-        ->get()
-        ->map(fn($t) => [
-            'id'          => $t->id,
-            'codigo'      => $t->codigo,
-            'solicitante' => trim("{$t->solicitante?->nombres} {$t->solicitante?->paterno} {$t->solicitante?->materno}"),
-            'celular'     => $t->celular,
-            'categoria'   => $t->servicio?->categoria?->nombre,
-            'servicio'    => $t->servicio?->nombre,
-            'asunto'      => $t->asunto,
-            'descripcion' => $t->descripcion,
-            'estado'      => $t->estado,
-            'fecha'       => $t->created_at?->format('d/m/Y H:i'),
-            'archivos'    => $t->archivos->map(fn($a) => [
-                'id'     => $a->id,
-                'nombre' => $a->archivo?->filename_original,
-                'peso'   => $a->archivo?->filesize_human,
-                'ruta'   => $a->archivo?->ruta
-                    ? Storage::disk('minio')->temporaryUrl($a->archivo->ruta, now()->addHour())
-                    : null,
-                'tipo'   => $a->tipo,
-            ]),
-            'historial' => $t->historial->sortBy('created_at')->values()->map(fn($h) => [
-                'id'              => $h->id,
-                'estado_anterior' => $h->estadoAnterior?->nombre,
-                'estado_nuevo'    => $h->estadoNuevo?->nombre,
-                'usuario'         => trim("{$h->user?->nombres} {$h->user?->paterno}"),
-                'comentario'      => $h->comentario,
-                'es_conformidad'  => $h->es_conformidad,
-                'fecha'           => $h->created_at?->format('d/m/Y H:i'),
-            ]),
-        ]);
+            ->whereNull('especialista_id')
+            ->latest()
+            ->get()
+            ->map(fn($t) => [
+                'id' => $t->id,
+                'codigo' => $t->codigo,
+                'solicitante' => trim("{$t->solicitante?->nombres} {$t->solicitante?->paterno} {$t->solicitante?->materno}"),
+                'celular' => $t->celular,
+                'categoria' => $t->servicio?->categoria?->nombre,
+                'servicio' => $t->servicio?->nombre,
+                'asunto' => $t->asunto,
+                'descripcion' => $t->descripcion,
+                'estado' => $t->estado,
+                'fecha' => $t->created_at?->format('d/m/Y H:i'),
+                'archivos' => $t->archivos->map(fn($a) => [
+                    'id' => $a->id,
+                    'nombre' => $a->archivo?->filename_original,
+                    'peso' => $a->archivo?->filesize_human,
+                    'ruta' => $a->archivo?->ruta
+                        ? Storage::disk('minio')->temporaryUrl($a->archivo->ruta, now()->addHour())
+                        : null,
+                    'tipo' => $a->tipo,
+                ]),
+                'historial' => $t->historial->sortBy('created_at')->values()->map(fn($h) => [
+                    'id' => $h->id,
+                    'estado_anterior' => $h->estadoAnterior?->nombre,
+                    'estado_nuevo' => $h->estadoNuevo?->nombre,
+                    'usuario' => trim("{$h->user?->nombres} {$h->user?->paterno}"),
+                    'comentario' => $h->comentario,
+                    'es_conformidad' => $h->es_conformidad,
+                    'fecha' => $h->created_at?->format('d/m/Y H:i'),
+                ]),
+            ]);
 
         $canales = Canal::where('activo', true)
             ->orderBy('label')
@@ -69,17 +70,17 @@ class TicketsController extends Controller
 
         $categorias = Categoria::with(['servicios' => function ($q) {
             $q->where('activo', true)
-              ->with(['formatos.archivo'])
-              ->orderBy('nombre');
+                ->with(['formatos.archivo'])
+                ->orderBy('nombre');
         }])
-        ->whereHas('servicios', fn($q) => $q->where('activo', true))
-        ->where('activo', true)
-        ->orderBy('nombre')
-        ->get(['id', 'nombre']);
+            ->whereHas('servicios', fn($q) => $q->where('activo', true))
+            ->where('activo', true)
+            ->orderBy('nombre')
+            ->get(['id', 'nombre']);
 
         return Inertia::render('MesaServicio/Tickets/Index', [
-            'tickets'    => $tickets,
-            'canales'    => $canales,
+            'tickets' => $tickets,
+            'canales' => $canales,
             'categorias' => $categorias,
         ]);
     }
@@ -88,14 +89,14 @@ class TicketsController extends Controller
     {
         $validated = $request->validate([
             'trabajador_id' => ['required', 'integer', 'exists:trabajadores,id'],
-            'canal_id'      => ['required', 'integer', 'exists:canales,id'],
-            'modo'          => ['required', 'in:1,2'],
-            'servicio_id'   => ['nullable', 'integer', 'exists:servicios,id'],
-            'asunto'        => ['required', 'string', 'max:500'],
-            'celular'       => ['nullable', 'string', 'max:15'],
-            'descripcion'   => ['nullable', 'string'],
-            'archivos'      => ['nullable', 'array', 'max:5'],
-            'archivos.*'    => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
+            'canal_id' => ['required', 'integer', 'exists:canales,id'],
+            'modo' => ['required', 'in:1,2'],
+            'servicio_id' => ['nullable', 'integer', 'exists:servicios,id'],
+            'asunto' => ['required', 'string', 'max:500'],
+            'celular' => ['nullable', 'string', 'max:15'],
+            'descripcion' => ['nullable', 'string'],
+            'archivos' => ['nullable', 'array', 'max:5'],
+            'archivos.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
         ]);
 
         if ($validated['modo'] === '2') {
@@ -106,62 +107,62 @@ class TicketsController extends Controller
         $trabajador = Trabajador::with('user')->findOrFail($validated['trabajador_id']);
         abort_unless($trabajador->user, 422, 'El trabajador no tiene un usuario asociado.');
 
-        $year  = now()->year;
-        $last  = Ticket::whereYear('created_at', $year)->orderByDesc('id')->value('codigo');
-        $seq   = 1;
-        if ($last && preg_match('/TKT-\d{4}-(\d+)/', $last, $m)) {
-            $seq = (int) $m[1] + 1;
+        $year = now()->year;
+        $last = Ticket::whereYear('created_at', $year)->orderByDesc('id')->value('codigo');
+        $seq = 1;
+        if ($last && preg_match('/\d{4}-(\d+)/', $last, $m)) {
+            $seq = (int)$m[1] + 1;
         }
-        $codigo = sprintf('TKT-%d-%05d', $year, $seq);
+        $codigo = sprintf('%d-%05d', $year, $seq);
 
         $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
 
         $ticket = Ticket::create([
-            'codigo'         => $codigo,
+            'codigo' => $codigo,
             'solicitante_id' => $trabajador->user->id,
-            'canal_id'       => $validated['canal_id'],
-            'servicio_id'    => $validated['servicio_id'] ?? null,
-            'estado'         => $estadoInicio->nombre,
-            'asunto'         => $validated['asunto'],
-            'celular'        => $validated['celular'] ?? null,
-            'descripcion'    => $validated['descripcion'] ?? null,
+            'canal_id' => $validated['canal_id'],
+            'servicio_id' => $validated['servicio_id'] ?? null,
+            'estado' => $estadoInicio->nombre,
+            'asunto' => $validated['asunto'],
+            'celular' => $validated['celular'] ?? null,
+            'descripcion' => $validated['descripcion'] ?? null,
         ]);
 
         TicketHistorial::create([
-            'ticket_id'          => $ticket->id,
+            'ticket_id' => $ticket->id,
             'estado_anterior_id' => null,
-            'estado_nuevo_id'    => $estadoInicio->id,
-            'user_id'            => Auth::id(),
-            'comentario'         => 'Ticket creado por Mesa de Servicio.',
-            'es_conformidad'     => false,
-            'created_at'         => now(),
+            'estado_nuevo_id' => $estadoInicio->id,
+            'user_id' => Auth::id(),
+            'comentario' => 'Ticket creado por Mesa de Servicio.',
+            'es_conformidad' => false,
+            'created_at' => now(),
         ]);
 
         if ($request->hasFile('archivos')) {
             foreach ($request->file('archivos') as $file) {
-                $carpeta  = "tickets/{$codigo}";
+                $carpeta = "tickets/{$codigo}";
                 $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-                $ruta     = "{$carpeta}/{$filename}";
+                $ruta = "{$carpeta}/{$filename}";
 
                 Storage::disk('minio')->putFileAs($carpeta, $file, $filename, 'private');
 
-                $bytes   = $file->getSize();
+                $bytes = $file->getSize();
                 $archivo = Archivo::create([
-                    'filename'          => $filename,
+                    'filename' => $filename,
                     'filename_original' => $file->getClientOriginalName(),
-                    'filesize'          => $bytes,
-                    'filesize_human'    => $this->humanSize($bytes),
-                    'hash'              => hash_file('sha256', $file->getRealPath()),
-                    'mime_type'         => $file->getMimeType(),
-                    'carpeta'           => $carpeta,
-                    'ruta'              => $ruta,
+                    'filesize' => $bytes,
+                    'filesize_human' => $this->humanSize($bytes),
+                    'hash' => hash_file('sha256', $file->getRealPath()),
+                    'mime_type' => $file->getMimeType(),
+                    'carpeta' => $carpeta,
+                    'ruta' => $ruta,
                 ]);
 
                 TicketArchivo::create([
-                    'ticket_id'            => $ticket->id,
-                    'archivo_id'           => $archivo->id,
-                    'user_id'              => Auth::id(),
-                    'tipo'                 => 'adjunto',
+                    'ticket_id' => $ticket->id,
+                    'archivo_id' => $archivo->id,
+                    'user_id' => Auth::id(),
+                    'tipo' => 'adjunto',
                     'firmado_digitalmente' => false,
                 ]);
             }
@@ -175,31 +176,30 @@ class TicketsController extends Controller
     {
         $q = trim($request->input('q', ''));
 
-        if (mb_strlen($q) < 4) {
+        if (mb_strlen($q) < 3) {
             return response()->json([]);
         }
 
         $qNorm = Str::ascii(mb_strtoupper($q));
 
-        $resultados = Trabajador::with(['user', 'dependencia', 'cargo', 'local'])
+        $resultados = Trabajador::with(['dependencia', 'local'])
             ->where('activo', true)
-            ->whereHas('user')
             ->where(function ($query) use ($qNorm) {
-                $query->where('dni', 'like', "%{$qNorm}%")
-                      ->orWhere('paterno', 'like', "%{$qNorm}%")
-                      ->orWhere('materno', 'like', "%{$qNorm}%")
-                      ->orWhere('nombres', 'like', "%{$qNorm}%");
+
+                $query->whereRaw("
+                    translate(upper(dni || ' ' || paterno || ' ' || materno || ' ' || nombres), 'áéíóúÁÉÍÓÚñÑ', 'aeiouAEIOUnN')
+                    LIKE translate(upper(?), 'áéíóúÁÉÍÓÚñÑ', 'aeiouAEIOUnN') ", ["%$qNorm%"]);
+
             })
             ->orderBy('paterno')->orderBy('materno')->orderBy('nombres')
             ->limit(20)
             ->get()
             ->map(fn($t) => [
-                'id'          => $t->id,
-                'label'       => "{$t->dni} {$t->paterno} {$t->materno} {$t->nombres}",
-                'celular'     => $t->celular,
+                'id' => $t->id,
+                'label' => "{$t->dni} {$t->paterno} {$t->materno} {$t->nombres}",
+                'celular' => $t->celular,
                 'dependencia' => $t->dependencia?->nombre,
-                'cargo'       => $t->cargo?->nombre,
-                'local'       => $t->local?->nombre,
+                'local' => $t->local?->nombre,
             ]);
 
         return response()->json($resultados);
@@ -209,7 +209,7 @@ class TicketsController extends Controller
     {
         foreach (['B', 'KB', 'MB', 'GB'] as $unit) {
             if ($bytes < 1024) return "{$bytes} {$unit}";
-            $bytes = (int) round($bytes / 1024);
+            $bytes = (int)round($bytes / 1024);
         }
         return "{$bytes} TB";
     }

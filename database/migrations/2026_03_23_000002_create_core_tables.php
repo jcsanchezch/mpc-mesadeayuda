@@ -27,27 +27,9 @@ return new class extends Migration
             $table->timestamps(0);
         });
 
-        Schema::create('cargos', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('origen_id')->nullable()->unique()->comment('ID original en la BD principal de origen');
-            $table->string('nombre', 255);
-            $table->boolean('activo')->default(true);
-            $table->timestamps(0);
-        });
-        /*
-        GERENTE MUNICIPAL, GERENTE MUNICIPAL (E)
-        DIRECTOR, DIRECTOR (E)
-        GERENTE, GERENTE (E)
-        SUBGERENTE, SUBGERENTE (E)
-        JEFE, JEFE(E)
-        TI,
-        TRABAJADOR
-        */
-
         Schema::create('trabajadores', function (Blueprint $table) {
             $table->id();
             $table->foreignId('dependencia_id')->constrained('dependencias');
-            $table->foreignId('cargo_id')->constrained('cargos');
             $table->foreignId('local_id')->nullable()->constrained('locales')->nullOnDelete();
             $table->string('dni', 10)->unique();
             $table->string('paterno', 100);
@@ -284,7 +266,6 @@ return new class extends Migration
         });
         Schema::dropIfExists('trabajadores');
         Schema::dropIfExists('locales');
-        Schema::dropIfExists('cargos');
         Schema::dropIfExists('dependencias');
     }
 };
