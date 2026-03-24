@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tipo extends Model
 {
-    protected $fillable = ['nombre', 'descripcion', 'disponible_solicitante', 'activo'];
+    protected $fillable = ['codigo', 'label', 'descripcion', 'disponible_al_solicitante', 'activo'];
 
     public function servicios() { return $this->hasMany(Servicio::class); }
 }

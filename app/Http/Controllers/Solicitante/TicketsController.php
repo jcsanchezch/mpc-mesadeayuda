@@ -57,8 +57,8 @@ class TicketsController extends Controller
             ]),
             'historial' => $t->historial->sortBy('created_at')->values()->map(fn($h) => [
                 'id'              => $h->id,
-                'estado_anterior' => $h->estadoAnterior?->nombre,
-                'estado_nuevo'    => $h->estadoNuevo?->nombre,
+                'estado_anterior' => $h->estadoAnterior?->codigo,
+                'estado_nuevo'    => $h->estadoNuevo?->codigo,
                 'usuario'         => trim("{$h->user?->nombres} {$h->user?->paterno}"),
                 'comentario'      => $h->comentario,
                 'es_conformidad'  => $h->es_conformidad,
@@ -70,13 +70,13 @@ class TicketsController extends Controller
         $cerrados = $todos->where('cerrado', true)->values();
 
         $categorias = Categoria::with(['servicios' => function ($q) {
-            $q->whereHas('tipo', fn($t) => $t->where('disponible_solicitante', true))
+            $q->whereHas('tipo', fn($t) => $t->where('disponible_al_solicitante', true))
               ->where('activo', true)
               ->with(['formatos.archivo'])
               ->orderBy('nombre');
         }])
         ->whereHas('servicios', function ($q) {
-            $q->whereHas('tipo', fn($t) => $t->where('disponible_solicitante', true))
+            $q->whereHas('tipo', fn($t) => $t->where('disponible_al_solicitante', true))
               ->where('activo', true);
         })
         ->where('activo', true)
@@ -125,17 +125,18 @@ class TicketsController extends Controller
         $codigo = sprintf('%d-%05d', $year, $seq);
 
         $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
-        $canalMesa    = Canal::where('nombre', 'MESA_DE_AYUDA')->firstOrFail();
+        $canalMesa    = Canal::where('codigo', 'MESA_DE_AYUDA')->firstOrFail();
 
         $ticket = Ticket::create([
-            'codigo'         => $codigo,
-            'solicitante_id' => Auth::id(),
-            'canal_id'       => $canalMesa->id,
-            'servicio_id'    => $validated['servicio_id'] ?? null,
-            'estado'         => $estadoInicio->nombre,
-            'asunto'         => $validated['asunto'],
-            'celular'        => $validated['celular'] ?? null,
-            'descripcion'    => $validated['descripcion'] ?? null,
+            'codigo'                    => $codigo,
+            'solicitante_id'            => Auth::id(),
+            'canal_id'                  => $canalMesa->id,
+            'servicio_id'               => $validated['servicio_id'] ?? null,
+            'servicio_directo'          => $validated['modo'] === '2',
+            'estado'                    => $estadoInicio->codigo,
+            'asunto'                    => $validated['asunto'],
+            'celular'                   => $validated['celular'] ?? null,
+            'descripcion'               => $validated['descripcion'] ?? null,
         ]);
 
         TicketHistorial::create([
@@ -196,8 +197,8 @@ class TicketsController extends Controller
         abort_if($ticket->solicitante_id !== Auth::id(), 403);
         abort_if($ticket->estado !== 'ATENDIDO', 422, 'El ticket no está en estado ATENDIDO.');
 
-        $estadoAtendido = Estado::where('nombre', 'ATENDIDO')->firstOrFail();
-        $estadoCerrado  = Estado::where('nombre', 'CERRADO')->firstOrFail();
+        $estadoAtendido = Estado::where('codigo', 'ATENDIDO')->firstOrFail();
+        $estadoCerrado  = Estado::where('codigo', 'CERRADO')->firstOrFail();
 
         TicketHistorial::create([
             'ticket_id'          => $ticket->id,

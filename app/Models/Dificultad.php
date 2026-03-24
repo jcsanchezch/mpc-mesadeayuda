@@ -8,7 +8,7 @@ class Dificultad extends Model
 {
     protected $table = 'dificultades';
 
-    protected $fillable = ['nivel', 'nombre', 'label', 'color', 'activo'];
+    protected $fillable = ['nivel', 'codigo', 'label', 'color', 'activo'];
 
     public function tickets() { return $this->hasMany(Ticket::class); }
 }

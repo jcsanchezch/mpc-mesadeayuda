@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Prioridad extends Model
 {
     protected $table = 'prioridades';
-    protected $fillable = ['nombre', 'label', 'text_color', 'bg_color', 'activo'];
+    protected $fillable = ['codigo', 'label', 'text_color', 'bg_color', 'activo'];
 }

@@ -58,9 +58,10 @@ return new class extends Migration
 
         Schema::create('tipos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre', 300);
+            $table->string('codigo', 300);
+            $table->string('label', 300);
             $table->text('descripcion')->nullable();
-            $table->boolean('disponible_solicitante')->default(true);
+            $table->boolean('disponible_al_solicitante')->default(true);
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
@@ -78,7 +79,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedTinyInteger('nivel')->unique()
                   ->comment('Tier ITIL 4 — 0: Autoservicio, 1: Mesa de Servicios, 2: Soporte Técnico, 3: Soporte Experto, 4: Proveedor Externo');
-            $table->string('nombre', 10)->unique()
+            $table->string('codigo', 10)->unique()
                   ->comment('Código corto: N0, N1, N2, N3, N4');
             $table->string('label', 150);
             $table->text('descripcion')->nullable();
@@ -113,7 +114,7 @@ return new class extends Migration
 
         Schema::create('estados', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre', 30)->unique();
+            $table->string('codigo', 30)->unique();
             $table->string('label', 100);
             $table->string('text_color', 100)->default('text-gray-700');
             $table->string('bg_color', 100)->default('text-gray-100');
@@ -126,7 +127,7 @@ return new class extends Migration
 
         Schema::create('prioridades', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre', 50)->unique();
+            $table->string('codigo', 50)->unique();
             $table->string('label', 100);
             $table->string('text_color', 50)->default('text-gray-500');
             $table->string('bg_color', 50)->default('bg-gray-100');
@@ -136,8 +137,9 @@ return new class extends Migration
 
         Schema::create('canales', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre', 50)->unique();
+            $table->string('codigo', 50)->unique();
             $table->string('label', 100);
+            $table->boolean('es_aplicacion')->default(false);
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
@@ -145,7 +147,7 @@ return new class extends Migration
         Schema::create('dificultades', function (Blueprint $table) {
             $table->id();
             $table->unsignedTinyInteger('nivel')->unique()->comment('Orden ascendente: 1=más simple, 5=más complejo');
-            $table->string('nombre', 30)->unique();
+            $table->string('codigo', 30)->unique();
             $table->string('label', 100);
             $table->string('color', 10)->default('#6b7280');
             $table->boolean('activo')->default(true);
@@ -162,9 +164,12 @@ return new class extends Migration
             $table->foreignId('canal_id')->nullable()->constrained('canales')->nullOnDelete();
 
             $table->foreignId('prioridad_id')->nullable()->constrained('prioridades')->nullOnDelete();
-            $table->foreignId('dificultad_id')->nullable()->constrained('dificultades')->nullOnDelete();
             $table->foreignId('servicio_id')->nullable()->constrained('servicios')->nullOnDelete();
             $table->foreignId('especialista_id')->nullable()->constrained('especialistas')->nullOnDelete();
+            $table->boolean('servicio_directo')->default(false)->comment('El asunto fue tomado del nombre del servicio, no escrito manualmente');
+
+            $table->foreignId('dificultad_id')->nullable()->constrained('dificultades')->nullOnDelete();
+
             $table->string('estado', 30)->default('EN_ESPERA');
             $table->string('asunto', 500);
             $table->string('celular', 15)->nullable();
@@ -182,8 +187,6 @@ return new class extends Migration
             $table->index('especialista_id');
             $table->index('ticket_padre_id');
         });
-
-
 
 
         Schema::create('tickets_historial', function (Blueprint $table) {

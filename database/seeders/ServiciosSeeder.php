@@ -11,18 +11,18 @@ class ServiciosSeeder extends Seeder
     {
         // ── TIPOS ─────────────────────────────────────────────────────────────
         $tipos = [
-            ['nombre' => 'Solicitud', 'disponible_solicitante' => true,  'activo' => true],
-            ['nombre' => 'Incidente', 'disponible_solicitante' => true,  'activo' => true],
-            ['nombre' => 'Cambio',    'disponible_solicitante' => false, 'activo' => true],
-            ['nombre' => 'Evento',    'disponible_solicitante' => false, 'activo' => true],
-            ['nombre' => 'Problema',  'disponible_solicitante' => false, 'activo' => true],
+            ['codigo' => 'SOLICITUD', 'label' => 'Solicitud', 'disponible_al_solicitante' => true,  'activo' => true],
+            ['codigo' => 'INCIDENTE', 'label' => 'Incidente', 'disponible_al_solicitante' => true,  'activo' => true],
+            ['codigo' => 'CAMBIO',    'label' => 'Cambio',    'disponible_al_solicitante' => false, 'activo' => true],
+            ['codigo' => 'EVENTO',    'label' => 'Evento',    'disponible_al_solicitante' => false, 'activo' => true],
+            ['codigo' => 'PROBLEMA',  'label' => 'Problema',  'disponible_al_solicitante' => false, 'activo' => true],
         ];
 
         foreach ($tipos as $tipo) {
             DB::table('tipos')->insertOrIgnore($tipo);
         }
 
-        $tipoSolicitudId = DB::table('tipos')->where('nombre', 'Solicitud')->value('id');
+        $tipoSolicitudId = DB::table('tipos')->where('codigo', 'SOLICITUD')->value('id');
 
         // ── CATEGORIAS Y SERVICIOS ────────────────────────────────────────────
         $catalogo = [

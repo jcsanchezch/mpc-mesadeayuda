@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Archivo;
 use App\Models\Canal;
 use App\Models\Categoria;
+use App\Models\Dificultad;
 use App\Models\Dependencia;
+use App\Models\Especialista;
 use App\Models\Local;
 use App\Models\Estado;
 use App\Models\Prioridad;
@@ -14,6 +16,7 @@ use App\Models\Servicio;
 use App\Models\Ticket;
 use App\Models\TicketArchivo;
 use App\Models\TicketHistorial;
+use App\Models\Tipo;
 use App\Models\Trabajador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +50,7 @@ class TicketsController extends Controller
                 'servicio' => $t->servicio?->nombre,
                 'asunto' => $t->asunto,
                 'descripcion' => $t->descripcion,
-                'prioridad' => $t->prioridad?->nombre,
+                'prioridad' => $t->prioridad?->codigo,
                 'estado' => $t->estado,
                 'fecha' => $t->created_at?->format('d/m/Y H:i'),
                 'archivos' => $t->archivos->map(fn($a) => [
@@ -61,8 +64,8 @@ class TicketsController extends Controller
                 ]),
                 'historial' => $t->historial->sortBy('created_at')->values()->map(fn($h) => [
                     'id' => $h->id,
-                    'estado_anterior' => $h->estadoAnterior?->nombre,
-                    'estado_nuevo' => $h->estadoNuevo?->nombre,
+                    'estado_anterior' => $h->estadoAnterior?->codigo,
+                    'estado_nuevo' => $h->estadoNuevo?->codigo,
                     'usuario' => trim("{$h->user?->nombres} {$h->user?->paterno}"),
                     'comentario' => $h->comentario,
                     'es_conformidad' => $h->es_conformidad,
@@ -70,8 +73,8 @@ class TicketsController extends Controller
                 ]),
             ]);
 
-        $estados     = Estado::where('activo', true)->get(['nombre', 'label', 'text_color', 'bg_color']);
-        $prioridades = Prioridad::where('activo', true)->get(['nombre', 'label', 'text_color', 'bg_color']);
+        $estados     = Estado::where('activo', true)->get(['codigo', 'label', 'text_color', 'bg_color']);
+        $prioridades = Prioridad::where('activo', true)->get(['codigo', 'label', 'text_color', 'bg_color']);
 
         return Inertia::render('MesaServicio/Tickets/Index', [
             'tickets'     => $tickets,
@@ -82,9 +85,10 @@ class TicketsController extends Controller
 
     public function crearVista()
     {
-        $canales = Canal::where('activo', true)
+        $canales = Canal::where('es_aplicacion', false)
+        ->where('activo', true)
             ->orderBy('label')
-            ->get(['id', 'nombre', 'label']);
+            ->get(['id', 'codigo', 'label']);
 
         $categorias = Categoria::with(['servicios' => function ($q) {
             $q->where('activo', true)
@@ -146,16 +150,17 @@ class TicketsController extends Controller
         $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
 
         $ticket = Ticket::create([
-            'codigo' => $codigo,
-            'solicitante_id'  => $trabajador->id,
-            'dependencia_id'  => $validated['dependencia_id'],
-            'local_id'        => $validated['local_id'],
-            'canal_id'        => $validated['canal_id'],
-            'servicio_id' => $validated['servicio_id'] ?? null,
-            'estado' => $estadoInicio->nombre,
-            'asunto' => $validated['asunto'],
-            'celular' => $validated['celular'],
-            'descripcion' => $validated['descripcion'],
+            'codigo'                  => $codigo,
+            'solicitante_id'          => $trabajador->id,
+            'dependencia_id'          => $validated['dependencia_id'],
+            'local_id'                => $validated['local_id'],
+            'canal_id'                => $validated['canal_id'],
+            'servicio_id'             => $validated['servicio_id'] ?? null,
+            'servicio_directo'        => $validated['modo'] === '2',
+            'estado'                  => $estadoInicio->codigo,
+            'asunto'                  => $validated['asunto'],
+            'celular'                 => $validated['celular'],
+            'descripcion'             => $validated['descripcion'],
         ]);
 
         TicketHistorial::create([
@@ -200,6 +205,194 @@ class TicketsController extends Controller
 
         return redirect()->route('mesadeayuda.tickets.index')
             ->with('success', "Ticket {$codigo} creado correctamente.");
+    }
+
+    public function ver(Ticket $ticket)
+    {
+        $ticket->load([
+            'servicio.categoria',
+            'solicitante.dependencia',
+            'solicitante.local',
+            'canal',
+            'prioridad',
+            'historial.estadoAnterior',
+            'historial.estadoNuevo',
+            'historial.user',
+            'archivos.archivo',
+        ]);
+
+        $data = [
+            'id'          => $ticket->id,
+            'codigo'      => $ticket->codigo,
+            'dni'         => $ticket->solicitante?->dni,
+            'solicitante' => trim("{$ticket->solicitante?->paterno} {$ticket->solicitante?->materno} {$ticket->solicitante?->nombres}"),
+            'dependencia' => $ticket->solicitante?->dependencia?->nombre,
+            'local'       => $ticket->solicitante?->local?->nombre,
+            'celular'     => $ticket->celular,
+            'canal'       => $ticket->canal?->label,
+            'categoria'   => $ticket->servicio?->categoria?->nombre,
+            'servicio'    => $ticket->servicio?->nombre,
+            'asunto'      => $ticket->asunto,
+            'descripcion' => $ticket->descripcion,
+            'resolucion'  => $ticket->resolucion,
+            'prioridad'   => $ticket->prioridad?->codigo,
+            'estado'      => $ticket->estado,
+            'fecha'       => $ticket->created_at?->format('d/m/Y H:i'),
+            'archivos'    => $ticket->archivos->map(fn($a) => [
+                'id'     => $a->id,
+                'nombre' => $a->archivo?->filename_original,
+                'peso'   => $a->archivo?->filesize_human,
+                'ruta'   => $a->archivo?->ruta
+                    ? Storage::disk('minio')->temporaryUrl($a->archivo->ruta, now()->addHour())
+                    : null,
+                'tipo'   => $a->tipo,
+            ]),
+            'historial'   => $ticket->historial->sortBy('created_at')->values()->map(fn($h) => [
+                'id'              => $h->id,
+                'estado_anterior' => $h->estadoAnterior?->codigo,
+                'estado_nuevo'    => $h->estadoNuevo?->codigo,
+                'usuario'         => trim("{$h->user?->nombres} {$h->user?->paterno}"),
+                'comentario'      => $h->comentario,
+                'es_conformidad'  => $h->es_conformidad,
+                'fecha'           => $h->created_at?->format('d/m/Y H:i'),
+            ]),
+        ];
+
+        $estados     = Estado::where('activo', true)->get(['codigo', 'label', 'text_color', 'bg_color']);
+        $prioridades = Prioridad::where('activo', true)->get(['codigo', 'label', 'text_color', 'bg_color']);
+
+        return Inertia::render('MesaServicio/Tickets/Ver', [
+            'ticket'      => $data,
+            'estados'     => $estados,
+            'prioridades' => $prioridades,
+        ]);
+    }
+
+    public function clasificarVista(Ticket $ticket)
+    {
+        if ($ticket->estado !== 'EN_ESPERA') {
+            return redirect()->route('mesadeayuda.tickets.ver', $ticket->id);
+        }
+
+        $ticket->load([
+            'servicio.categoria',
+            'solicitante.dependencia',
+            'solicitante.local',
+            'canal',
+            'prioridad',
+            'historial.estadoAnterior',
+            'historial.estadoNuevo',
+            'historial.user',
+            'archivos.archivo',
+        ]);
+
+        $data = [
+            'id'          => $ticket->id,
+            'codigo'      => $ticket->codigo,
+            'dni'         => $ticket->solicitante?->dni,
+            'solicitante' => trim("{$ticket->solicitante?->paterno} {$ticket->solicitante?->materno} {$ticket->solicitante?->nombres}"),
+            'dependencia' => $ticket->solicitante?->dependencia?->nombre,
+            'local'       => $ticket->solicitante?->local?->nombre,
+            'celular'     => $ticket->celular,
+            'canal'       => $ticket->canal?->label,
+            'categoria'   => $ticket->servicio?->categoria?->nombre,
+            'servicio'    => $ticket->servicio?->nombre,
+            'servicio_id' => $ticket->servicio_id,
+            'asunto'      => $ticket->asunto,
+            'descripcion' => $ticket->descripcion,
+            'prioridad'   => $ticket->prioridad?->codigo,
+            'prioridad_id'=> $ticket->prioridad_id,
+            'estado'      => $ticket->estado,
+            'fecha'       => $ticket->created_at?->format('d/m/Y H:i'),
+            'archivos'    => $ticket->archivos->map(fn($a) => [
+                'id'     => $a->id,
+                'nombre' => $a->archivo?->filename_original,
+                'peso'   => $a->archivo?->filesize_human,
+                'ruta'   => $a->archivo?->ruta
+                    ? Storage::disk('minio')->temporaryUrl($a->archivo->ruta, now()->addHour())
+                    : null,
+                'tipo'   => $a->tipo,
+            ]),
+            'historial'   => $ticket->historial->sortBy('created_at')->values()->map(fn($h) => [
+                'id'              => $h->id,
+                'estado_anterior' => $h->estadoAnterior?->codigo,
+                'estado_nuevo'    => $h->estadoNuevo?->codigo,
+                'usuario'         => trim("{$h->user?->nombres} {$h->user?->paterno}"),
+                'comentario'      => $h->comentario,
+                'es_conformidad'  => $h->es_conformidad,
+                'fecha'           => $h->created_at?->format('d/m/Y H:i'),
+            ]),
+        ];
+
+        $tipos = Tipo::where('activo', true)->orderBy('label')->get(['id', 'codigo', 'label']);
+
+        $servicios = Servicio::where('activo', true)
+            ->with('categoria')
+            ->orderBy('nombre')
+            ->get()
+            ->map(fn($s) => [
+                'id'       => $s->id,
+                'nombre'   => $s->nombre,
+                'tipo_id'  => $s->tipo_id,
+                'categoria'=> $s->categoria?->nombre,
+            ]);
+
+        $prioridades = Prioridad::where('activo', true)->get(['id', 'codigo', 'label', 'text_color', 'bg_color']);
+
+        $especialistas = Especialista::where('activo', true)
+            ->with('trabajador')
+            ->get()
+            ->map(fn($e) => [
+                'id'    => $e->id,
+                'label' => trim("{$e->trabajador?->paterno} {$e->trabajador?->materno} {$e->trabajador?->nombres}"),
+            ]);
+
+        $estados = Estado::where('activo', true)->get(['codigo', 'label', 'text_color', 'bg_color']);
+
+        return Inertia::render('MesaServicio/Tickets/Clasificar', [
+            'ticket'       => $data,
+            'estados'      => $estados,
+            'tipos'        => $tipos,
+            'servicios'    => $servicios,
+            'prioridades'  => $prioridades,
+            'especialistas'=> $especialistas,
+        ]);
+    }
+
+    public function clasificar(Request $request, Ticket $ticket)
+    {
+        if ($ticket->estado !== 'EN_ESPERA') {
+            return redirect()->route('mesadeayuda.tickets.ver', $ticket->id);
+        }
+
+        $validated = $request->validate([
+            'servicio_id'     => ['required', 'integer', 'exists:servicios,id'],
+            'prioridad_id'    => ['required', 'integer', 'exists:prioridades,id'],
+            'especialista_id' => ['required', 'integer', 'exists:especialistas,id'],
+        ]);
+
+        $estadoAnterior = Estado::where('codigo', $ticket->estado)->first();
+        $estadoAsignado = Estado::where('codigo', 'ASIGNADO')->firstOrFail();
+
+        $ticket->update([
+            'servicio_id'     => $validated['servicio_id'],
+            'prioridad_id'    => $validated['prioridad_id'],
+            'especialista_id' => $validated['especialista_id'],
+            'estado'          => $estadoAsignado->codigo,
+        ]);
+
+        TicketHistorial::create([
+            'ticket_id'          => $ticket->id,
+            'estado_anterior_id' => $estadoAnterior?->id,
+            'estado_nuevo_id'    => $estadoAsignado->id,
+            'user_id'            => Auth::id(),
+            'comentario'         => 'Ticket clasificado y asignado a especialista.',
+            'es_conformidad'     => false,
+            'created_at'         => now(),
+        ]);
+
+        return redirect()->route('mesadeayuda.tickets.index')
+            ->with('success', "Ticket {$ticket->codigo} clasificado y asignado correctamente.");
     }
 
     public function buscarTrabajador(Request $request)

@@ -8,7 +8,7 @@ class Canal extends Model
 {
     protected $table = 'canales';
 
-    protected $fillable = ['nombre', 'label', 'activo'];
+    protected $fillable = ['codigo', 'label', 'es_aplicacion', 'activo'];
 
     public function tickets() { return $this->hasMany(Ticket::class); }
 }

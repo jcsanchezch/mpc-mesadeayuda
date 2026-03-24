@@ -23,6 +23,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'       => 'JUAN CARLOS',
                 'dependencia'   => 'OTI',
                 'local'         => 'QHAPAC ÑAN',
+                'celular'       => '987654321',
                 'activo'        => true,
                 'vincular_user' => 'CSANCHEZ',
             ],
@@ -33,6 +34,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'JORGE LUIS',
                 'dependencia' => 'OTI',
                 'local'       => 'QHAPAC ÑAN',
+                'celular'     => '912345678',
                 'activo'      => true,
             ],
             [
@@ -42,6 +44,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'ANA MARIA',
                 'dependencia' => 'OGAF',
                 'local'       => 'QHAPAC ÑAN',
+                'celular'     => '923456789',
                 'activo'      => true,
             ],
             [
@@ -51,6 +54,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'PEDRO ANTONIO',
                 'dependencia' => 'GM',
                 'local'       => 'QHAPAC ÑAN',
+                'celular'     => '934567890',
                 'activo'      => true,
             ],
             [
@@ -60,6 +64,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'LUCIA BEATRIZ',
                 'dependencia' => 'OGAJ',
                 'local'       => 'QHAPAC ÑAN',
+                'celular'     => '945678901',
                 'activo'      => true,
             ],
             // ── CASA MIGUEL ESPINACH — 2 trabajadores ─────────────
@@ -70,6 +75,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'ROBERTO CARLOS',
                 'dependencia' => 'OC',
                 'local'       => 'CASA MIGUEL ESPINACH',
+                'celular'     => '956789012',
                 'activo'      => true,
             ],
             [
@@ -79,6 +85,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'ELENA ROSA',
                 'dependencia' => 'OGPP',
                 'local'       => 'CASA MIGUEL ESPINACH',
+                'celular'     => '967890123',
                 'activo'      => true,
             ],
             // ── Resto sorteado entre otros locales ────────────────
@@ -89,6 +96,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'FELIX RAUL',
                 'dependencia' => 'GIP',
                 'local'       => 'ESTADIO MUNICIPAL',
+                'celular'     => '978901234',
                 'activo'      => true,
             ],
             [
@@ -98,6 +106,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'CARMEN SOFIA',
                 'dependencia' => 'ORCP',
                 'local'       => 'SERENAZGO',
+                'celular'     => '989012345',
                 'activo'      => true,
             ],
             [
@@ -107,6 +116,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'MIGUEL ANGEL',
                 'dependencia' => 'OMAC',
                 'local'       => 'CENTRO MEDICO MUNICIPAL',
+                'celular'     => '990123456',
                 'activo'      => true,
             ],
             [
@@ -116,6 +126,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'PATRICIA ISABEL',
                 'dependencia' => 'OPM',
                 'local'       => 'REAL PLAZA',
+                'celular'     => '901234567',
                 'activo'      => true,
             ],
             [
@@ -125,6 +136,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'JUAN PABLO',
                 'dependencia' => 'OTI',
                 'local'       => 'POLICIA MUNICIPAL',
+                'celular'     => '911234567',
                 'activo'      => true,
             ],
             [
@@ -134,6 +146,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'MARIA ELENA',
                 'dependencia' => 'OGAF',
                 'local'       => 'MERCADO CENTRAL DE CAJAMARCA',
+                'celular'     => '922345678',
                 'activo'      => true,
             ],
             [
@@ -143,6 +156,7 @@ class TrabajadoresSeeder extends Seeder
                 'nombres'     => 'CARLOS DAVID',
                 'dependencia' => 'GM',
                 'local'       => 'CUNA JARDIN',
+                'celular'     => '933456789',
                 'activo'      => true,
             ],
         ];

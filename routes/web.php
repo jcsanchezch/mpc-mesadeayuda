@@ -18,6 +18,9 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         Route::get('/tickets',            [MesadeayudaTicketsController::class, 'index'])->name('tickets.index');
         Route::get('/tickets/crear',      [MesadeayudaTicketsController::class, 'crearVista'])->name('tickets.crear.vista');
         Route::post('/tickets',           [MesadeayudaTicketsController::class, 'crearTicket'])->name('tickets.crear');
+        Route::get('/tickets/{ticket}',            [MesadeayudaTicketsController::class, 'ver'])->name('tickets.ver');
+        Route::get('/tickets/{ticket}/clasificar', [MesadeayudaTicketsController::class, 'clasificarVista'])->name('tickets.clasificar.vista');
+        Route::post('/tickets/{ticket}/clasificar',[MesadeayudaTicketsController::class, 'clasificar'])->name('tickets.clasificar');
         Route::get('/trabajadores/buscar',[MesadeayudaTicketsController::class, 'buscarTrabajador'])->name('trabajadores.buscar');
     });
 

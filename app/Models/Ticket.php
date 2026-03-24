@@ -8,10 +8,13 @@ class Ticket extends Model
 {
     protected $fillable = [
         'codigo', 'solicitante_id', 'dependencia_id', 'local_id', 'canal_id', 'servicio_id', 'especialista_id',
+        'servicio_directo',
         'prioridad_id', 'estado', 'asunto', 'celular', 'descripcion', 'es_padre', 'ticket_padre_id',
     ];
 
     public function prioridad()     { return $this->belongsTo(Prioridad::class); }
+    public function especialista()  { return $this->belongsTo(Especialista::class); }
+    public function dificultad()    { return $this->belongsTo(Dificultad::class); }
     public function solicitante()   { return $this->belongsTo(Trabajador::class, 'solicitante_id'); }
     public function dependencia()   { return $this->belongsTo(Dependencia::class); }
     public function local()         { return $this->belongsTo(Local::class); }
