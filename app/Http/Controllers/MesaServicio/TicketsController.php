@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Archivo;
 use App\Models\Canal;
 use App\Models\Categoria;
+use App\Models\Dependencia;
+use App\Models\Local;
 use App\Models\Estado;
+use App\Models\Prioridad;
 use App\Models\Servicio;
 use App\Models\Ticket;
 use App\Models\TicketArchivo;
@@ -25,7 +28,8 @@ class TicketsController extends Controller
     {
         $tickets = Ticket::with([
             'servicio.categoria',
-            'solicitante.trabajador',
+            'solicitante',
+            'prioridad',
             'historial.estadoNuevo',
             'historial.user',
             'archivos.archivo',
@@ -36,12 +40,14 @@ class TicketsController extends Controller
             ->map(fn($t) => [
                 'id' => $t->id,
                 'codigo' => $t->codigo,
-                'solicitante' => trim("{$t->solicitante?->nombres} {$t->solicitante?->paterno} {$t->solicitante?->materno}"),
+                'dni' => $t->solicitante?->dni,
+                'solicitante' => trim("{$t->solicitante?->paterno} {$t->solicitante?->materno} {$t->solicitante?->nombres}"),
                 'celular' => $t->celular,
                 'categoria' => $t->servicio?->categoria?->nombre,
                 'servicio' => $t->servicio?->nombre,
                 'asunto' => $t->asunto,
                 'descripcion' => $t->descripcion,
+                'prioridad' => $t->prioridad?->nombre,
                 'estado' => $t->estado,
                 'fecha' => $t->created_at?->format('d/m/Y H:i'),
                 'archivos' => $t->archivos->map(fn($a) => [
@@ -64,6 +70,18 @@ class TicketsController extends Controller
                 ]),
             ]);
 
+        $estados     = Estado::where('activo', true)->get(['nombre', 'label', 'text_color', 'bg_color']);
+        $prioridades = Prioridad::where('activo', true)->get(['nombre', 'label', 'text_color', 'bg_color']);
+
+        return Inertia::render('MesaServicio/Tickets/Index', [
+            'tickets'     => $tickets,
+            'estados'     => $estados,
+            'prioridades' => $prioridades,
+        ]);
+    }
+
+    public function crearVista()
+    {
         $canales = Canal::where('activo', true)
             ->orderBy('label')
             ->get(['id', 'nombre', 'label']);
@@ -78,24 +96,30 @@ class TicketsController extends Controller
             ->orderBy('nombre')
             ->get(['id', 'nombre']);
 
-        return Inertia::render('MesaServicio/Tickets/Index', [
-            'tickets' => $tickets,
-            'canales' => $canales,
-            'categorias' => $categorias,
+        $dependencias = Dependencia::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
+        $locales = Local::where('activo', true)->orderBy('nombre')->get(['id', 'nombre', 'direccion']);
+
+        return Inertia::render('MesaServicio/Tickets/Crear', [
+            'canales'      => $canales,
+            'categorias'   => $categorias,
+            'dependencias' => $dependencias,
+            'locales'      => $locales,
         ]);
     }
 
     public function crearTicket(Request $request)
     {
         $validated = $request->validate([
-            'trabajador_id' => ['required', 'integer', 'exists:trabajadores,id'],
-            'canal_id' => ['required', 'integer', 'exists:canales,id'],
+            'trabajador_id'  => ['required', 'integer', 'exists:trabajadores,id'],
+            'dependencia_id' => ['required', 'integer', 'exists:dependencias,id'],
+            'local_id'       => ['required', 'integer', 'exists:locales,id'],
+            'canal_id'       => ['required', 'integer', 'exists:canales,id'],
             'modo' => ['required', 'in:1,2'],
             'servicio_id' => ['nullable', 'integer', 'exists:servicios,id'],
-            'asunto' => ['required', 'string', 'max:500'],
-            'celular' => ['nullable', 'string', 'max:15'],
-            'descripcion' => ['nullable', 'string'],
-            'archivos' => ['nullable', 'array', 'max:5'],
+            'asunto' => ['required_if:modo,1', 'nullable', 'string', 'max:500'],
+            'celular' => ['required', 'string', 'max:15'],
+            'descripcion' => ['required', 'string'],
+            'archivos' => ['nullable', 'array', 'max:10'],
             'archivos.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
         ]);
 
@@ -104,8 +128,12 @@ class TicketsController extends Controller
             $validated['asunto'] = Servicio::findOrFail($validated['servicio_id'])->nombre;
         }
 
-        $trabajador = Trabajador::with('user')->findOrFail($validated['trabajador_id']);
-        abort_unless($trabajador->user, 422, 'El trabajador no tiene un usuario asociado.');
+        // Convertir string vacío a null para servicio_id (viene así desde FormData)
+        if (($validated['servicio_id'] ?? null) === '') {
+            $validated['servicio_id'] = null;
+        }
+
+        $trabajador = Trabajador::findOrFail($validated['trabajador_id']);
 
         $year = now()->year;
         $last = Ticket::whereYear('created_at', $year)->orderByDesc('id')->value('codigo');
@@ -119,13 +147,15 @@ class TicketsController extends Controller
 
         $ticket = Ticket::create([
             'codigo' => $codigo,
-            'solicitante_id' => $trabajador->user->id,
-            'canal_id' => $validated['canal_id'],
+            'solicitante_id'  => $trabajador->id,
+            'dependencia_id'  => $validated['dependencia_id'],
+            'local_id'        => $validated['local_id'],
+            'canal_id'        => $validated['canal_id'],
             'servicio_id' => $validated['servicio_id'] ?? null,
             'estado' => $estadoInicio->nombre,
             'asunto' => $validated['asunto'],
-            'celular' => $validated['celular'] ?? null,
-            'descripcion' => $validated['descripcion'] ?? null,
+            'celular' => $validated['celular'],
+            'descripcion' => $validated['descripcion'],
         ]);
 
         TicketHistorial::create([
@@ -198,8 +228,8 @@ class TicketsController extends Controller
                 'id' => $t->id,
                 'label' => "{$t->dni} {$t->paterno} {$t->materno} {$t->nombres}",
                 'celular' => $t->celular,
-                'dependencia' => $t->dependencia?->nombre,
-                'local' => $t->local?->nombre,
+                'dependencia_id' => $t->dependencia?->id,
+                'local_id' => $t->local?->id,
             ]);
 
         return response()->json($resultados);

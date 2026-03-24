@@ -12,14 +12,14 @@ class ParametrosSeeder extends Seeder
         // ── Estados ───────────────────────────────────────────────────────────
         // actor: 'ti' = personal TI debe actuar | 'solicitante' = solicitante debe actuar | null = estado final
         $estados = [
-            ['nombre' => 'EN_ESPERA',   'label' => 'En Espera',   'color' => '#a16207', 'es_inicio' => true,  'es_fin' => false, 'actor' => 'ti',          'activo' => true],
-            ['nombre' => 'ASIGNADO',    'label' => 'Asignado',    'color' => '#7e22ce', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti',          'activo' => true],
-            ['nombre' => 'PROGRAMADO',  'label' => 'Programado',  'color' => '#4338ca', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti',          'activo' => true],
-            ['nombre' => 'ATENDIENDO',  'label' => 'Atendiendo',  'color' => '#1d4ed8', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti',          'activo' => true],
-            ['nombre' => 'INFORMACION', 'label' => 'Información', 'color' => '#c2410c', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
-            ['nombre' => 'ATENDIDO',    'label' => 'Atendido',    'color' => '#047857', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
-            ['nombre' => 'CANCELADO',   'label' => 'Cancelado',   'color' => '#b91c1c', 'es_inicio' => false, 'es_fin' => true,  'actor' => null,          'activo' => true],
-            ['nombre' => 'CERRADO',     'label' => 'Cerrado',     'color' => '#374151', 'es_inicio' => false, 'es_fin' => true,  'actor' => null,          'activo' => true],
+            ['nombre' => 'EN_ESPERA',   'label' => 'En Espera',   'text_color' => 'text-yellow-700',  'bg_color' => 'bg-yellow-100',  'es_inicio' => true,  'es_fin' => false, 'actor' => 'ti',          'activo' => true],
+            ['nombre' => 'ASIGNADO',    'label' => 'Asignado',    'text_color' => 'text-purple-700',  'bg_color' => 'bg-purple-100',  'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti',          'activo' => true],
+            ['nombre' => 'PROGRAMADO',  'label' => 'Programado',  'text_color' => 'text-indigo-700',  'bg_color' => 'bg-indigo-100',  'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti',          'activo' => true],
+            ['nombre' => 'ATENDIENDO',  'label' => 'Atendiendo',  'text_color' => 'text-blue-700',    'bg_color' => 'bg-blue-100',    'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti',          'activo' => true],
+            ['nombre' => 'INFORMACION', 'label' => 'Información', 'text_color' => 'text-orange-700',  'bg_color' => 'bg-orange-100',  'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
+            ['nombre' => 'ATENDIDO',    'label' => 'Atendido',    'text_color' => 'text-emerald-700', 'bg_color' => 'bg-emerald-100', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
+            ['nombre' => 'CANCELADO',   'label' => 'Cancelado',   'text_color' => 'text-red-700',     'bg_color' => 'bg-red-100',     'es_inicio' => false, 'es_fin' => true,  'actor' => null,          'activo' => true],
+            ['nombre' => 'CERRADO',     'label' => 'Cerrado',     'text_color' => 'text-gray-500',    'bg_color' => 'bg-gray-100',    'es_inicio' => false, 'es_fin' => true,  'actor' => null,          'activo' => true],
         ];
 
         foreach ($estados as $e) {
@@ -41,9 +41,9 @@ class ParametrosSeeder extends Seeder
 
         // ── Prioridades ───────────────────────────────────────────────────────
         $prioridades = [
-            ['nombre' => 'NORMAL',      'label' => 'Normal',      'activo' => true],
-            ['nombre' => 'URGENTE',     'label' => 'Urgente',     'activo' => true],
-            ['nombre' => 'MUY_URGENTE', 'label' => 'Muy Urgente', 'activo' => true],
+            ['nombre' => 'NORMAL',      'label' => 'Normal',      'text_color' => 'text-blue-700',   'bg_color' => 'bg-blue-100',   'activo' => true],
+            ['nombre' => 'URGENTE',     'label' => 'Urgente',     'text_color' => 'text-yellow-700', 'bg_color' => 'bg-yellow-100', 'activo' => true],
+            ['nombre' => 'MUY_URGENTE', 'label' => 'Muy Urgente', 'text_color' => 'text-red-700',    'bg_color' => 'bg-red-100',    'activo' => true],
         ];
 
         foreach ($prioridades as $p) {

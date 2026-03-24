@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Estado extends Model
 {
     protected $table = 'estados';
-    protected $fillable = ['nombre', 'es_inicio', 'es_fin', 'activo'];
+    protected $fillable = ['nombre', 'label', 'text_color', 'bg_color', 'es_inicio', 'es_fin', 'actor', 'activo'];
 }

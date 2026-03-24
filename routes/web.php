@@ -16,6 +16,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     Route::prefix('mesadeayuda')->name('mesadeayuda.')->group(function () {
         Route::get('/tickets',            [MesadeayudaTicketsController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/crear',      [MesadeayudaTicketsController::class, 'crearVista'])->name('tickets.crear.vista');
         Route::post('/tickets',           [MesadeayudaTicketsController::class, 'crearTicket'])->name('tickets.crear');
         Route::get('/trabajadores/buscar',[MesadeayudaTicketsController::class, 'buscarTrabajador'])->name('trabajadores.buscar');
     });

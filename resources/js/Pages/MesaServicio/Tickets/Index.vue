@@ -2,17 +2,15 @@
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import TableBase from '@/Components/TableBase.vue';
 import ButtonBase from '@/Components/ButtonBase.vue';
-import CrearTicket from '@/Pages/MesaServicio/Tickets/CrearTicket.vue';
-import {ref} from 'vue';
+import {router} from '@inertiajs/vue3';
+import {ref, computed} from 'vue';
+import {route} from 'ziggy-js';
 
 const props = defineProps({
-    tickets: {type: Array, default: () => []},
-    canales: {type: Array, default: () => []},
-    categorias: {type: Array, default: () => []},
+    tickets:     {type: Array, default: () => []},
+    estados:     {type: Array, default: () => []},
+    prioridades: {type: Array, default: () => []},
 });
-
-// ── Crear Ticket ─────────────────────────────────────────────
-const mostrarFormulario = ref(false);
 
 // ── Modal detalle ─────────────────────────────────────────────
 const modalDetalle = ref(false);
@@ -33,94 +31,100 @@ const verHistorial = (ticket) => {
 };
 
 // ── Helpers ──────────────────────────────────────────────────
-const estadoClase = (estado) => ({
-    'EN_ESPERA': 'bg-yellow-100 text-yellow-700',
-    'ASIGNADO': 'bg-purple-100 text-purple-700',
-    'PROGRAMADO': 'bg-indigo-100 text-indigo-700',
-    'ATENDIENDO': 'bg-blue-100 text-blue-700',
-    'INFORMACION': 'bg-orange-100 text-orange-700',
-    'ATENDIDO': 'bg-emerald-100 text-emerald-700',
-    'CANCELADO': 'bg-red-100 text-red-700',
-    'CERRADO': 'bg-gray-100 text-gray-500',
-}[estado] ?? 'bg-gray-100 text-gray-500');
+const estadoMap = computed(() =>
+    Object.fromEntries(props.estados.map(e => [e.nombre, e]))
+);
 
-const estadoLabel = (estado) => ({
-    'EN_ESPERA': 'En Espera',
-    'ASIGNADO': 'Asignado',
-    'PROGRAMADO': 'Programado',
-    'ATENDIENDO': 'Atendiendo',
-    'INFORMACION': 'Información',
-    'ATENDIDO': 'Atendido',
-    'CANCELADO': 'Cancelado',
-    'CERRADO': 'Cerrado',
-}[estado] ?? estado);
+const estadoLabel = (nombre) => estadoMap.value[nombre]?.label ?? nombre;
+
+const estadoClase = (nombre) => {
+    const e = estadoMap.value[nombre];
+    return `${e?.text_color ?? 'text-gray-500'} ${e?.bg_color ?? 'bg-gray-100'}`;
+};
+
+const prioridadMap = computed(() =>
+    Object.fromEntries(props.prioridades.map(p => [p.nombre, p]))
+);
+
+const prioridadLabel = (nombre) => prioridadMap.value[nombre]?.label ?? nombre;
+
+const prioridadClase = (nombre) => {
+    const p = prioridadMap.value[nombre];
+    return `${p?.text_color ?? 'text-gray-500'} ${p?.bg_color ?? 'bg-gray-100'}`;
+};
 </script>
 
 <template>
     <AuthLayout>
         <template #header>Mesa de Servicio — Tickets sin asignar</template>
 
-        <!-- ── Vista: Formulario ────────────────────────────────────── -->
-        <CrearTicket v-if="mostrarFormulario"
-                     :canales="canales"
-                     :categorias="categorias"
-                     @cancelar="mostrarFormulario = false"/>
-
-        <!-- ── Vista: Lista de tickets ──────────────────────────────── -->
-        <template v-else>
-            <div class="flex justify-start mb-4">
-                <ButtonBase label="Nuevo Ticket" icon="fa-solid fa-plus"
-                            @click="mostrarFormulario = true"/>
-            </div>
+        <div class="flex justify-start mb-4">
+            <ButtonBase label="Nuevo Ticket" icon="fa-solid fa-plus"
+                        @click="router.visit(route('mesadeayuda.tickets.crear.vista'))"/>
+        </div>
 
             <TableBase>
                 <template #thead>
                     <tr class="text-left text-xs font-bold text-gray-500 uppercase">
-                        <th class="px-3 py-3 text-center w-10">#</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200">Código</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200">Solicitante</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200">Celular</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200">Servicio</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200">Asunto</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200 text-center">Estado</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200 text-center">Fecha</th>
-                        <th class="px-3 py-3 border-l border-l-gray-200 text-center">Acciones</th>
+                        <th class="px-2 py-2 text-center w-10">#</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200">Código</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200">DNI</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200">Solicitante</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200">Celular</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200">Asunto</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200 text-center">Fecha</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200">Categoría</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200">Servicio</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200 text-center">Prioridad</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200 text-center">Estado</th>
+                        <th class="px-2 py-2 border-l border-l-gray-200 text-center">Acciones</th>
                     </tr>
                 </template>
                 <template #tbody>
                     <tr v-if="!tickets.length">
-                        <td colspan="9" class="text-center text-gray-400 py-10 font-light text-base">
+                        <td colspan="13" class="text-center text-gray-400 py-10 font-light text-base">
                             No hay tickets pendientes de asignación
                         </td>
                     </tr>
                     <tr v-for="(ticket, i) in tickets" :key="ticket.id"
                         class="text-xs text-gray-600 hover:bg-blue-50 transition duration-150">
-                        <td class="px-3 py-3 text-center text-gray-400">{{ i + 1 }}</td>
-                        <td class="px-3 py-3 border-l border-l-gray-200 font-medium text-gray-700 whitespace-nowrap">
+                        <td class="px-2 py-2 text-center text-gray-400">{{ i + 1 }}</td>
+                        <td class="px-2 py-2 border-l border-l-gray-200 font-medium text-gray-700 whitespace-nowrap">
                             {{ ticket.codigo }}
                         </td>
-                        <td class="px-3 py-3 border-l border-l-gray-200">
+                        <td class="px-2 py-2 border-l border-l-gray-200 font-mono whitespace-nowrap">
+                            {{ ticket.dni ?? '—' }}
+                        </td>
+                        <td class="px-2 py-2 border-l border-l-gray-200">
                             {{ ticket.solicitante }}
                         </td>
-                        <td class="px-3 py-3 border-l border-l-gray-200 whitespace-nowrap">
+                        <td class="px-2 py-2 border-l border-l-gray-200 whitespace-nowrap font-mono">
                             {{ ticket.celular ?? '—' }}
                         </td>
-                        <td class="px-3 py-3 border-l border-l-gray-200">
-                            <div class="text-gray-400">{{ ticket.categoria ?? '—' }}</div>
-                            <div>{{ ticket.servicio ?? '—' }}</div>
-                        </td>
-                        <td class="px-3 py-3 border-l border-l-gray-200 max-w-xs truncate">
+                        <td class="px-2 py-2 border-l border-l-gray-200 max-w-xs truncate">
                             {{ ticket.asunto }}
                         </td>
-                        <td class="px-3 py-3 border-l border-l-gray-200 text-center">
-                            <span :class="['px-2 py-1 rounded-5px text-xs font-medium', estadoClase(ticket.estado)]">
+                        <td class="px-2 py-2 border-l border-l-gray-200 text-center whitespace-nowrap text-gray-500">
+                            {{ ticket.fecha }}
+                        </td>
+                        <td class="px-2 py-2 border-l border-l-gray-200">
+                            {{ ticket.categoria ?? '—' }}
+                        </td>
+                        <td class="px-2 py-2 border-l border-l-gray-200">
+                            {{ ticket.servicio ?? '—' }}
+                        </td>
+                        <td class="px-2 py-2 border-l border-l-gray-200 text-center">
+                            <span v-if="ticket.prioridad" class="px-2 py-1 rounded-5px text-xs font-medium" :class="prioridadClase(ticket.prioridad)">
+                                {{ prioridadLabel(ticket.prioridad) }}
+                            </span>
+                            <span v-else class="text-gray-300">—</span>
+                        </td>
+                        <td class="px-2 py-2 border-l border-l-gray-200 text-center">
+                            <span class="px-2 py-2 rounded-5px text-xs font-medium text-nowrap" :class="estadoClase(ticket.estado)">
                                 {{ estadoLabel(ticket.estado) }}
                             </span>
                         </td>
-                        <td class="px-3 py-3 border-l border-l-gray-200 text-center whitespace-nowrap text-gray-500">
-                            {{ ticket.fecha }}
-                        </td>
-                        <td class="px-3 py-3 border-l border-l-gray-200 text-center">
+                        <td class="px-2 py-2 border-l border-l-gray-200 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <button type="button" title="Ver detalle"
                                         class="bg-blue-500 border-b-2 border-b-blue-600 text-white p-1.5 rounded-5px text-xs cursor-pointer hover:bg-blue-600 transition"
@@ -137,7 +141,6 @@ const estadoLabel = (estado) => ({
                     </tr>
                 </template>
             </TableBase>
-        </template>
 
         <!-- ── Modal: Detalle ──────────────────────────────────────── -->
         <Teleport to="body">
@@ -163,10 +166,14 @@ const estadoLabel = (estado) => ({
                             </div>
                             <div>
                                 <p class="text-gray-400 mb-0.5">Estado</p>
-                                <span
-                                    :class="['px-2 py-1 rounded-5px text-xs font-medium', estadoClase(ticketDetalle?.estado)]">
+                                <span class="px-2 py-2 rounded-5px text-xs font-medium text-nowrap"
+                                    :class="estadoClase(ticketDetalle?.estado)">
                                     {{ estadoLabel(ticketDetalle?.estado) }}
                                 </span>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 mb-0.5">DNI</p>
+                                <p class="text-gray-700 font-mono">{{ ticketDetalle?.dni ?? '—' }}</p>
                             </div>
                             <div>
                                 <p class="text-gray-400 mb-0.5">Solicitante</p>
@@ -255,8 +262,8 @@ const estadoLabel = (estado) => ({
                                         </span>
                                         <i v-if="h.estado_anterior"
                                            class="fa-solid fa-arrow-right text-gray-300 text-xs"></i>
-                                        <span
-                                            :class="['text-xs font-semibold px-2 py-0.5 rounded-5px', estadoClase(h.estado_nuevo)]">
+                                        <span class="text-xs font-semibold px-2 py-0.5 rounded-5px"
+                                            :class="estadoClase(h.estado_nuevo)">
                                             {{ estadoLabel(h.estado_nuevo) }}
                                         </span>
                                     </div>
@@ -269,6 +276,5 @@ const estadoLabel = (estado) => ({
                 </div>
             </div>
         </Teleport>
-
     </AuthLayout>
 </template>

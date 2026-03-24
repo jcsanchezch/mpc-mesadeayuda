@@ -115,7 +115,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 30)->unique();
             $table->string('label', 100);
-            $table->string('color', 10)->default('#000000');
+            $table->string('text_color', 100)->default('text-gray-700');
+            $table->string('bg_color', 100)->default('text-gray-100');
             $table->boolean('es_inicio')->default(false)->comment('El ticket inicia con este estado');
             $table->boolean('es_fin')->default(false)->comment('El ticket finaliza con este estado');
             $table->string('actor', 15)->nullable()->comment('Quién debe actuar: ti | solicitante | null si es estado final');
@@ -127,6 +128,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 50)->unique();
             $table->string('label', 100);
+            $table->string('text_color', 50)->default('text-gray-500');
+            $table->string('bg_color', 50)->default('bg-gray-100');
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
@@ -152,9 +155,12 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->string('codigo', 20)->unique();
-            $table->foreignId('solicitante_id')->constrained('users');
 
+            $table->foreignId('solicitante_id')->constrained('trabajadores');
+            $table->foreignId('dependencia_id')->constrained('dependencias');
+            $table->foreignId('local_id')->constrained('locales');
             $table->foreignId('canal_id')->nullable()->constrained('canales')->nullOnDelete();
+
             $table->foreignId('prioridad_id')->nullable()->constrained('prioridades')->nullOnDelete();
             $table->foreignId('dificultad_id')->nullable()->constrained('dificultades')->nullOnDelete();
             $table->foreignId('servicio_id')->nullable()->constrained('servicios')->nullOnDelete();
@@ -198,7 +204,7 @@ return new class extends Migration
             $table->string('filename_original', 255);
             $table->unsignedBigInteger('filesize');
             $table->string('filesize_human', 20);
-            $table->string('hash', 64)->unique();
+            $table->string('hash', 64);
             $table->string('mime_type', 100)->nullable();
             $table->string('carpeta', 255);
             $table->string('ruta', 500);
