@@ -52,7 +52,7 @@ watch(collapsed, (val) => {
         <!-- Sidebar escritorio -->
         <div :class="[
             'hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out',
-            collapsed ? 'lg:w-12' : 'lg:w-64'
+            collapsed ? 'lg:w-14' : 'lg:w-64'
         ]">
             <div class="flex grow flex-col overflow-y-auto overflow-x-hidden bg-gray-100">
                 <Siderbar :collapsed="collapsed"/>
@@ -62,7 +62,7 @@ watch(collapsed, (val) => {
         <!-- Contenido principal -->
         <div :class="[
             'flex flex-1 flex-col transition-all duration-300 ease-in-out',
-            collapsed ? 'lg:pl-16' : 'lg:pl-64'
+            collapsed ? 'lg:pl-14' : 'lg:pl-64'
         ]">
             <div class="sticky top-0 z-10 flex h-16 shrink-0 bg-white border-b border-b-gray-200">
                 <!-- Botón hamburger móvil -->
@@ -74,7 +74,7 @@ watch(collapsed, (val) => {
                 </button>
                 <!-- Botón collapse escritorio -->
                 <button type="button"
-                        class="hidden lg:flex items-center border-r border-gray-200 px-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                        class="hidden lg:flex items-center border-r border-gray-200 text-base px-5 text-gray-400 hover:text-gray-600 transition-colors"
                         @click="collapsed = !collapsed">
                     <i :class="collapsed ? 'fa-solid fa-bars' : 'fa-solid fa-bars-staggered'"></i>
                 </button>

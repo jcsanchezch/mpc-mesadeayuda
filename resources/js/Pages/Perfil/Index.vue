@@ -3,8 +3,8 @@ import AuthLayout from '@/Layouts/AuthLayout.vue';
 import { usePage, useForm } from '@inertiajs/vue3';
 import TextInput from "@/Components/TextInput.vue";
 import InputLabel from "@/Components/InputLabel.vue";
-import ButtonBase from "@/Components/ButtonBase.vue";
 import { route } from 'ziggy-js';
+import UiButton from "@/Components/Buttons/UiButton.vue";
 
 const props = defineProps({
     celular:  { type: String, default: null },
@@ -97,7 +97,11 @@ const submit = () => {
                 </div>
 
                 <div class="mt-5 flex items-center gap-3">
-                    <ButtonBase type="submit" label="Guardar cambios" icon="fa-solid fa-floppy-disk"
+                    <UiButton
+                        type="submit"
+                        label="Guardar cambios"
+                        icon="fa-solid fa-floppy-disk"
+                        size="md"
                         :disabled="form.processing" />
                 </div>
             </form>

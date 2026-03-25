@@ -1,11 +1,11 @@
 <script setup>
-import AuthLayout from '@/Layouts/AuthLayout.vue';
-import TableBase from '@/Components/TableBase.vue';
-import ButtonBase from '@/Components/ButtonBase.vue';
 import {router} from '@inertiajs/vue3';
 import {computed} from 'vue';
 import {route} from 'ziggy-js';
 import {upperCase} from "lodash-es";
+import AuthLayout from '@/Layouts/AuthLayout.vue';
+import TableBase from '@/Components/TableBase.vue';
+import UiButton from "@/Components/Buttons/UiButton.vue";
 
 const props = defineProps({
     tickets:     {type: Array, default: () => []},
@@ -42,7 +42,10 @@ const prioridadClase = (nombre) => {
         <template #header>Mesa de Servicio — Tickets sin asignar</template>
 
         <div class="flex justify-start mb-4">
-            <ButtonBase label="Nuevo Ticket" icon="fa-solid fa-plus"
+            <UiButton
+                label="Nuevo Ticket"
+                icon="fa-solid fa-plus"
+                size="sm"
                         @click="router.visit(route('mesadeayuda.tickets.crear.vista'))"/>
         </div>
 
@@ -105,16 +108,16 @@ const prioridadClase = (nombre) => {
                         </td>
                         <td class="px-1.5 py-2 border-l border-l-gray-200 text-center">
                             <div class="inline-flex items-center gap-1.5">
-                                <button type="button" title="Ver ticket"
-                                        class="inline-flex items-center gap-1.5 bg-gray-100 border-b-2 border-b-gray-200 text-gray-600 px-2.5 py-1.5 rounded-5px text-xs cursor-pointer hover:bg-gray-200 transition"
-                                        @click="router.visit(route('mesadeayuda.tickets.ver', ticket.id))">
-                                    <i class="fa-solid fa-eye"></i> Ver
-                                </button>
-                                <button v-if="ticket.estado === 'EN_ESPERA'" type="button" title="Clasificar ticket"
-                                        class="inline-flex items-center gap-1.5 bg-blue-500 border-b-2 border-b-blue-600 text-white px-2.5 py-1.5 rounded-5px text-xs cursor-pointer hover:bg-blue-600 transition"
-                                        @click="router.visit(route('mesadeayuda.tickets.clasificar.vista', ticket.id))">
-                                    <i class="fa-solid fa-tags"></i> Clasificar
-                                </button>
+                                <UiButton
+                                    label="Ver"
+                                    icon="fa-solid fa-eye"
+                                    @click="router.visit(route('mesadeayuda.tickets.ver', ticket.id))"
+                                />
+                                <UiButton
+                                    label="Clasificar"
+                                    icon="fa-solid fa-tags"
+                                    @click="router.visit(route('mesadeayuda.tickets.clasificar.vista', ticket.id))"
+                                />
                             </div>
                         </td>
                     </tr>

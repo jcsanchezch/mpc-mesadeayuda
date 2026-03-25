@@ -2,7 +2,7 @@
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
-import ButtonBase from '@/Components/ButtonBase.vue';
+import UiButton from "@/Components/Buttons/UiButton.vue";
 import {useForm, router} from '@inertiajs/vue3';
 import {ref, computed} from 'vue';
 import {route} from 'ziggy-js';
@@ -528,12 +528,14 @@ const submit = () => {
 
             <!-- ── Acciones ────────────────────────────────────────────── -->
             <div class="flex items-center gap-3">
-                <ButtonBase type="submit" label="Crear Ticket" icon="fa-solid fa-paper-plane"
-                            :disabled="form.processing"/>
-                <button type="button" class="text-sm text-gray-500 hover:text-gray-700 transition"
-                        @click="cancelar">
-                    Cancelar
-                </button>
+                <UiButton
+                    type="submit"
+                    size="md"
+                    color="blue"
+                    label="Crear Ticket"
+                    icon="fa-regular fa-save"
+                    :disabled="form.processing"
+                />
             </div>
 
         </form>

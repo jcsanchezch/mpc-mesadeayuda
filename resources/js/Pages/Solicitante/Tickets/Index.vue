@@ -1,12 +1,12 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import TableBase from '@/Components/TableBase.vue';
-import ButtonBase from '@/Components/ButtonBase.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { route } from 'ziggy-js';
+import UiButton from "@/Components/Buttons/UiButton.vue";
 
 const props = defineProps({
     activos:      { type: Array,  default: () => [] },
@@ -321,8 +321,13 @@ const estadoLabel = (estado) => ({
 
                 <!-- Acciones -->
                 <div class="flex items-center gap-3 pt-1">
-                    <ButtonBase type="submit" label="Enviar Ticket" icon="fa-solid fa-paper-plane"
-                        :disabled="form.processing" />
+                    <UiButton
+                        type="submit"
+                        label="Enviar Ticket"
+                        icon="fa-solid fa-paper-plane"
+                        :disabled="form.processing"
+                        size="md"
+                    />
                     <button type="button" class="text-sm text-gray-500 hover:text-gray-700 transition"
                         @click="cancelarFormulario">
                         Cancelar
@@ -334,8 +339,12 @@ const estadoLabel = (estado) => ({
         <!-- ── Vista: Lista de tickets ──────────────────────────────── -->
         <template v-else>
             <div class="flex justify-start mb-4">
-                <ButtonBase label="Nuevo Ticket" icon="fa-solid fa-plus"
-                    @click="mostrarFormulario = true" />
+                <UiButton
+                    label="Nuevo Ticket"
+                    icon="fa-solid fa-plus"
+                    size="sm"
+                    @click="mostrarFormulario = true"
+                />
             </div>
 
             <TableBase>
