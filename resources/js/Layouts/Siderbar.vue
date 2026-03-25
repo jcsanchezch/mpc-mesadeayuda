@@ -51,11 +51,13 @@ const user = page.props.auth?.user;
             <div v-if="!collapsed" class="text-gray-400 uppercase py-1 px-2 text-xs font-medium tracking-wider">Menu
             </div>
 
+            <div v-if="collapsed" class="h-6"></div>
+
             <Link :href="route('home')"
                   :class="[
                     route().current('home') ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-700',
-                    collapsed ? 'justify-center' : ' ',
-                    'group flex items-center text-sm px-4 py-2 font-medium rounded-[4px]',
+                    collapsed ? 'justify-center text-lg py-3' : ' text-sm py-2 ',
+                    'group flex items-center text-sm px-4 font-medium rounded-[4px]',
                 ]"
                   :title="collapsed ? 'Home' : ''">
                 <i class="fa-regular fa-house" :class="collapsed ? ' ' : 'mr-1.5'"></i>
@@ -68,8 +70,8 @@ const user = page.props.auth?.user;
                       :href="route(item.route)"
                       :class="[
                         route().current(item.pattern) ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-700',
-                        collapsed ? 'justify-center text-lg' : ' text-sm',
-                        'group flex items-center px-4 py-2 font-medium rounded-[4px]'
+                        collapsed ? 'justify-center text-lg py-3 ' : ' text-sm py-2 ',
+                        'group flex items-center px-4 font-medium rounded-[4px]'
                     ]"
                       :title="collapsed ? item.name : ''">
                     <i :class="[item.icon, collapsed ? '' : 'mr-1.5']"></i>
@@ -86,10 +88,10 @@ const user = page.props.auth?.user;
                             'w-full flex items-center px-4 py-3 text-sm font-medium rounded-[4px]'
                         ]"
                         :title="collapsed ? item.name : ''">
-                        <div class="flex items-center" :class="collapsed ? '' : 'gap-1.5'">
+                        <span class="flex items-center" :class="collapsed ? '' : ' gap-1.5'">
                             <i :class="[item.icon]"></i>
                             <span v-if="!collapsed">{{ item.name }}</span>
-                        </div>
+                        </span>
                         <i v-if="!collapsed"
                            :class="['fa-solid fa-chevron-down text-xs transition-transform duration-200', openGroups[item.name] ? 'rotate-180' : '']">
                         </i>
