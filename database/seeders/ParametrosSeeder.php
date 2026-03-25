@@ -28,11 +28,12 @@ class ParametrosSeeder extends Seeder
 
         // ── Canales ───────────────────────────────────────────────────────────
         $canales = [
-            ['codigo' =>'MESA_DE_AYUDA', 'label' => 'Mesa de Servicio', 'activo' => true, 'es_aplicacion' => true],
+            ['codigo' =>'APLICACION', 'label' => 'Aplicación Mesa de Ayuda', 'activo' => true, 'es_aplicacion' => true],
+            //['codigo' =>'MESA_DE_SERVICIO', 'label' => 'Mesa de Servicio', 'activo' => true],
+            ['codigo' =>'PRESENCIAL', 'label' => 'Presencial', 'activo' => true],
             ['codigo' =>'CORREO', 'label' => 'Correo Electrónico', 'activo' => true],
             ['codigo' =>'SGD', 'label' => 'Sistema de Gestión Documental', 'activo' => true],
             ['codigo' =>'LLAMADA', 'label' => 'Llamada Telefónica', 'activo' => true],
-            ['codigo' =>'PRESENCIAL', 'label' => 'Presencial', 'activo' => true],
         ];
 
         foreach ($canales as $c) {

@@ -125,7 +125,7 @@ class TicketsController extends Controller
         $codigo = sprintf('%d-%05d', $year, $seq);
 
         $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
-        $canalMesa    = Canal::where('codigo', 'MESA_DE_AYUDA')->firstOrFail();
+        $canalMesa    = Canal::where('codigo', 'MESA_DE_SERVICIO')->firstOrFail();
 
         $ticket = Ticket::create([
             'codigo'                    => $codigo,

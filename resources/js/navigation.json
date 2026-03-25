@@ -1,0 +1,60 @@
+[
+    {
+        "name": "Home",
+        "icon": "fa-regular fa-house",
+        "route": "home",
+        "pattern": "home"
+    },
+    {
+        "name": "Mis Tickets",
+        "icon": "fa-regular fa-rectangle-list",
+        "route": "solicitante.index",
+        "pattern": "solicitante.index"
+    },
+    {
+        "name": "Mesa de Servicio",
+        "icon": "fa-solid fa-headset",
+        "children": [
+            {
+                "name": "Crear Ticket",
+                "icon": "fa-regular fa-plus",
+                "route": "mesadeservicio.tickets.crear.vista",
+                "pattern": "mesadeservicio.tickets.crear.vista"
+            },
+            {
+                "name": "Pendientes",
+                "icon": "fa-regular fa-clock",
+                "route": "mesadeservicio.tickets.index",
+                "query": { "estado": "pendiente" },
+                "pattern": "mesadeservicio.tickets.index"
+            },
+            {
+                "name": "Por Clasificar",
+                "icon": "fa-solid fa-tags",
+                "route": "mesadeservicio.tickets.index",
+                "query": { "estado": "por_clasificar" },
+                "pattern": "mesadeservicio.tickets.index"
+            },
+            {
+                "name": "Atendidos",
+                "icon": "fa-solid fa-clipboard-check",
+                "route": "mesadeservicio.tickets.index",
+                "query": { "estado": "atendido" },
+                "pattern": "mesadeservicio.tickets.index"
+            },
+            {
+                "name": "Cerrados",
+                "icon": "fa-solid fa-lock",
+                "route": "mesadeservicio.tickets.index",
+                "query": { "estado": "cerrado" },
+                "pattern": "mesadeservicio.tickets.index"
+            }
+        ]
+    },
+    {
+        "name": "Otro Menu",
+        "icon": "fa-regular fa-house",
+        "route": "home",
+        "pattern": "home"
+    }
+]

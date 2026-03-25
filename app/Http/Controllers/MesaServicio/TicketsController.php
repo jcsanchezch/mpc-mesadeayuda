@@ -103,11 +103,26 @@ class TicketsController extends Controller
         $dependencias = Dependencia::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
         $locales = Local::where('activo', true)->orderBy('nombre')->get(['id', 'nombre', 'direccion']);
 
+        $tipos = Tipo::where('activo', true)->orderBy('label')->get(['id', 'codigo', 'label']);
+
+        $prioridades = Prioridad::where('activo', true)->orderBy('id')->get(['id', 'codigo', 'label']);
+
+        $especialistas = Especialista::where('activo', true)
+            ->with('trabajador')
+            ->get()
+            ->map(fn($e) => [
+                'id'    => $e->id,
+                'label' => trim("{$e->trabajador?->paterno} {$e->trabajador?->materno} {$e->trabajador?->nombres}"),
+            ]);
+
         return Inertia::render('MesaServicio/Tickets/Crear', [
-            'canales'      => $canales,
-            'categorias'   => $categorias,
-            'dependencias' => $dependencias,
-            'locales'      => $locales,
+            'canales'       => $canales,
+            'categorias'    => $categorias,
+            'dependencias'  => $dependencias,
+            'locales'       => $locales,
+            'tipos'         => $tipos,
+            'prioridades'   => $prioridades,
+            'especialistas' => $especialistas,
         ]);
     }
 
@@ -117,12 +132,14 @@ class TicketsController extends Controller
             'trabajador_id'  => ['required', 'integer', 'exists:trabajadores,id'],
             'dependencia_id' => ['required', 'integer', 'exists:dependencias,id'],
             'local_id'       => ['required', 'integer', 'exists:locales,id'],
-            'canal_id'       => ['required', 'integer', 'exists:canales,id'],
+            'canal_id'       => ['nullable', 'integer', 'exists:canales,id'],
             'modo' => ['required', 'in:1,2'],
             'servicio_id' => ['nullable', 'integer', 'exists:servicios,id'],
             'asunto' => ['required_if:modo,1', 'nullable', 'string', 'max:500'],
             'celular' => ['required', 'string', 'max:15'],
             'descripcion' => ['required', 'string'],
+            'prioridad_id'    => ['nullable', 'integer', 'exists:prioridades,id'],
+            'especialista_id' => ['nullable', 'integer', 'exists:especialistas,id'],
             'archivos' => ['nullable', 'array', 'max:10'],
             'archivos.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
         ]);
@@ -149,61 +166,66 @@ class TicketsController extends Controller
 
         $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
 
-        $ticket = Ticket::create([
-            'codigo'                  => $codigo,
-            'solicitante_id'          => $trabajador->id,
-            'dependencia_id'          => $validated['dependencia_id'],
-            'local_id'                => $validated['local_id'],
-            'canal_id'                => $validated['canal_id'],
-            'servicio_id'             => $validated['servicio_id'] ?? null,
-            'servicio_directo'        => $validated['modo'] === '2',
-            'estado'                  => $estadoInicio->codigo,
-            'asunto'                  => $validated['asunto'],
-            'celular'                 => $validated['celular'],
-            'descripcion'             => $validated['descripcion'],
-        ]);
+        // Verificar archivos antes de iniciar la transacción
+        $archivos = $request->hasFile('archivos') ? $request->file('archivos') : [];
 
-        TicketHistorial::create([
-            'ticket_id' => $ticket->id,
-            'estado_anterior_id' => null,
-            'estado_nuevo_id' => $estadoInicio->id,
-            'user_id' => Auth::id(),
-            'comentario' => 'Ticket creado por Mesa de Servicio.',
-            'es_conformidad' => false,
-            'created_at' => now(),
-        ]);
+        DB::transaction(function () use ($validated, $trabajador, $codigo, $estadoInicio, $archivos) {
+            $ticket = Ticket::create([
+                'codigo'           => $codigo,
+                'solicitante_id'   => $trabajador->id,
+                'dependencia_id'   => $validated['dependencia_id'],
+                'local_id'         => $validated['local_id'],
+                'canal_id'         => $validated['canal_id'],
+                'servicio_id'      => $validated['servicio_id'] ?? null,
+                'servicio_directo' => $validated['modo'] === '2',
+                'estado'           => $estadoInicio->codigo,
+                'asunto'           => $validated['asunto'],
+                'celular'          => $validated['celular'],
+                'descripcion'      => $validated['descripcion'],
+                'prioridad_id'     => $validated['prioridad_id'] ?? null,
+                'especialista_id'  => $validated['especialista_id'] ?? null,
+            ]);
 
-        if ($request->hasFile('archivos')) {
-            foreach ($request->file('archivos') as $file) {
-                $carpeta = "tickets/{$codigo}";
+            TicketHistorial::create([
+                'ticket_id'          => $ticket->id,
+                'estado_anterior_id' => null,
+                'estado_nuevo_id'    => $estadoInicio->id,
+                'user_id'            => Auth::id(),
+                'comentario'         => 'Ticket creado por Mesa de Servicio.',
+                'es_conformidad'     => false,
+                'created_at'         => now(),
+            ]);
+
+            foreach ($archivos as $file) {
+                $carpeta  = "tickets/{$codigo}";
                 $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-                $ruta = "{$carpeta}/{$filename}";
+                $ruta     = "{$carpeta}/{$filename}";
 
                 Storage::disk('minio')->putFileAs($carpeta, $file, $filename, 'private');
 
-                $bytes = $file->getSize();
+                $bytes   = $file->getSize();
                 $archivo = Archivo::create([
-                    'filename' => $filename,
+                    'filename'          => $filename,
                     'filename_original' => $file->getClientOriginalName(),
-                    'filesize' => $bytes,
-                    'filesize_human' => $this->humanSize($bytes),
-                    'hash' => hash_file('sha256', $file->getRealPath()),
-                    'mime_type' => $file->getMimeType(),
-                    'carpeta' => $carpeta,
-                    'ruta' => $ruta,
+                    'filesize'          => $bytes,
+                    'filesize_human'    => $this->humanSize($bytes),
+                    'hash'              => hash_file('sha256', $file->getRealPath()),
+                    'mime_type'         => $file->getMimeType(),
+                    'carpeta'           => $carpeta,
+                    'ruta'              => $ruta,
                 ]);
 
                 TicketArchivo::create([
-                    'ticket_id' => $ticket->id,
-                    'archivo_id' => $archivo->id,
-                    'user_id' => Auth::id(),
-                    'tipo' => 'adjunto',
-                    'firmado_digitalmente' => false,
+                    'ticket_id'           => $ticket->id,
+                    'archivo_id'          => $archivo->id,
+                    'user_id'             => Auth::id(),
+                    'tipo'                => 'adjunto',
+                    'firmado_digitalmente'=> false,
                 ]);
             }
-        }
+        });
 
-        return redirect()->route('mesadeayuda.tickets.index')
+        return redirect()->route('mesadeservicio.tickets.index')
             ->with('success', "Ticket {$codigo} creado correctamente.");
     }
 
@@ -271,7 +293,7 @@ class TicketsController extends Controller
     public function clasificarVista(Ticket $ticket)
     {
         if ($ticket->estado !== 'EN_ESPERA') {
-            return redirect()->route('mesadeayuda.tickets.ver', $ticket->id);
+            return redirect()->route('mesadeservicio.tickets.ver', $ticket->id);
         }
 
         $ticket->load([
@@ -362,7 +384,7 @@ class TicketsController extends Controller
     public function clasificar(Request $request, Ticket $ticket)
     {
         if ($ticket->estado !== 'EN_ESPERA') {
-            return redirect()->route('mesadeayuda.tickets.ver', $ticket->id);
+            return redirect()->route('mesadeservicio.tickets.ver', $ticket->id);
         }
 
         $validated = $request->validate([
@@ -391,7 +413,7 @@ class TicketsController extends Controller
             'created_at'         => now(),
         ]);
 
-        return redirect()->route('mesadeayuda.tickets.index')
+        return redirect()->route('mesadeservicio.tickets.index')
             ->with('success', "Ticket {$ticket->codigo} clasificado y asignado correctamente.");
     }
 

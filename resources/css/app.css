@@ -51,7 +51,3 @@
 .even:hover > td {
     background-color: #fffeec !important;
 }
-
-.rounded-5px {
-    border-radius: 5px !important;
-}

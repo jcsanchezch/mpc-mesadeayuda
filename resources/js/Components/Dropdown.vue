@@ -53,7 +53,7 @@ const open = ref(false);
 
 <template>
     <div class="relative">
-        <div @click="open = !open" class="py-2.5 pl-3 pr-3 border border-transparent rounded-5px font-medium text-[13px] uppercase text-white bg-blue-500 border-b-2 border-b-blue-600 hover:text-white hover:bg-blue-600 focus:bg-blue-600 active:bg-blue-700 transition ease-in-out duration-150 leading-none cursor-pointer inline-block">
+        <div @click="open = !open" class="py-2.5 pl-3 pr-3 border border-transparent rounded-[4px] font-medium text-[13px] uppercase text-white bg-blue-500 border-b-2 border-b-blue-600 hover:text-white hover:bg-blue-600 focus:bg-blue-600 active:bg-blue-700 transition ease-in-out duration-150 leading-none cursor-pointer inline-block">
             <div class="inline-flex items-center tracking-tight">
                 <slot name="trigger"/>
                 <i class="fa-solid fa-angle-down text-xs ml-2"></i>
@@ -70,12 +70,12 @@ const open = ref(false);
         >
             <div
                 v-show="open"
-                class="absolute z-50 mt-1 rounded-5px shadow-md"
+                class="absolute z-50 mt-1 rounded-[4px] shadow-md"
                 :class="[widthClass, alignmentClasses]"
                 style="display: none"
                 @click="open = false"
             >
-                <div class="rounded-5px ring-1 ring-gray-300 ring-opacity-5" :class="contentClasses">
+                <div class="rounded-[4px] ring-1 ring-gray-300 ring-opacity-5" :class="contentClasses">
                     <slot name="content" />
                 </div>
             </div>

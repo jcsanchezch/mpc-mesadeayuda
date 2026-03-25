@@ -3,6 +3,7 @@ import AuthLayout from '@/Layouts/AuthLayout.vue';
 import {useForm, router} from '@inertiajs/vue3';
 import {computed, ref, watch} from 'vue';
 import {route} from 'ziggy-js';
+import UiButton from "@/Components/Buttons/UiButton.vue";
 
 const props = defineProps({
     ticket:        {type: Object, required: true},
@@ -43,13 +44,13 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('mesadeayuda.tickets.clasificar', props.ticket.id));
+    form.post(route('mesadeservicio.tickets.clasificar', props.ticket.id));
 };
 
-const volver = () => router.visit(route('mesadeayuda.tickets.ver', props.ticket.id));
+const pendientes = () => router.visit(route('mesadeservicio.tickets.index'));
 
-const selectClass = 'w-full border border-gray-300 rounded-5px py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 bg-white';
-const selectErrorClass = 'w-full border border-red-400 rounded-5px py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400 bg-white';
+const selectClass = 'w-full border border-gray-300 rounded-[4px] py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 bg-white';
+const selectErrorClass = 'w-full border border-red-400 rounded-[4px] py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400 bg-white';
 </script>
 
 <template>
@@ -60,127 +61,118 @@ const selectErrorClass = 'w-full border border-red-400 rounded-5px py-2 px-3 tex
 
             <!-- ── Botón volver ──────────────────────────────────────── -->
             <div>
-                <button type="button" @click="volver"
-                        class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
-                    <i class="fa-solid fa-arrow-left text-xs"></i> Volver al ticket
-                </button>
+                <UiButton
+                    label="Regresar a Pendientes"
+                    variant="outline"
+                    color="gray"
+                    size="md"
+                    icon="fa-solid fa-arrow-left"
+                    @click="pendientes"
+                />
             </div>
 
             <!-- ── Datos del solicitante ─────────────────────────────── -->
-            <div class="bg-white border border-gray-200 rounded-5px p-6 space-y-4">
+            <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Solicitante</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
 
-                    <div>
-                        <p class="text-xs text-gray-400 mb-1">DNI</p>
-                        <input type="text" readonly :value="ticket.dni ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700 font-mono"/>
+                    <div class="sm:col-span-6">
+                        <p class="text-xs text-gray-400 mb-1">Nombres</p>
+                        <input type="text" readonly :value="`${ticket.dni ?? '—'} ${ticket.solicitante}`"
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
                     </div>
-
-                    <div>
-                        <p class="text-xs text-gray-400 mb-1">Solicitante</p>
-                        <input type="text" readonly :value="ticket.solicitante"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700"/>
-                    </div>
-
-                    <div>
+                    <div class="sm:col-span-6">
                         <p class="text-xs text-gray-400 mb-1">Dependencia</p>
                         <input type="text" readonly :value="ticket.dependencia ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
                     </div>
-
-                    <div>
+                    <div class="sm:col-span-6">
                         <p class="text-xs text-gray-400 mb-1">Local</p>
                         <input type="text" readonly :value="ticket.local ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
                     </div>
-
-                    <div>
+                    <div class="sm:col-span-6">
                         <p class="text-xs text-gray-400 mb-1">Celular de contacto</p>
                         <input type="text" readonly :value="ticket.celular ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700 font-mono"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
                     </div>
-
                 </div>
             </div>
 
             <!-- ── Datos del ticket ──────────────────────────────────── -->
-            <div class="bg-white border border-gray-200 rounded-5px p-6 space-y-4">
+            <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ticket</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
 
-                    <div>
+                    <div class="sm:col-span-3">
                         <p class="text-xs text-gray-400 mb-1">Código</p>
                         <input type="text" readonly :value="ticket.codigo"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700 font-medium"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 font-medium"/>
                     </div>
-
-                    <div>
+                    <div class="sm:col-span-3">
                         <p class="text-xs text-gray-400 mb-1">Fecha de creación</p>
                         <input type="text" readonly :value="ticket.fecha"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
                     </div>
-
-                    <div>
+                    <div class="sm:col-span-3">
+                        <p class="text-xs text-gray-400 mb-1">Canal</p>
+                        <input type="text" readonly :value="ticket.canal ?? '—'"
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
+                    </div>
+                    <div class="sm:col-span-3">
                         <p class="text-xs text-gray-400 mb-1">Estado</p>
-                        <div class="py-2 px-3">
-                            <span class="px-2 py-1 rounded-5px text-xs font-medium"
+                        <div class="py-2">
+                            <span class="px-2 py-1 rounded-[4px] text-xs font-medium"
                                   :class="estadoClase(ticket.estado)">
                                 {{ estadoLabel(ticket.estado) }}
                             </span>
                         </div>
                     </div>
 
-                    <div>
-                        <p class="text-xs text-gray-400 mb-1">Canal</p>
-                        <input type="text" readonly :value="ticket.canal ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700"/>
-                    </div>
-
-                    <div class="sm:col-span-2">
+                    <div class="sm:col-span-12">
                         <p class="text-xs text-gray-400 mb-1">Asunto</p>
-                        <input type="text" readonly :value="ticket.asunto"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700"/>
+                        <textarea readonly rows="2"
+                                  class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 resize-none"
+                                  :value="ticket.asunto"></textarea>
                     </div>
 
-                    <div class="sm:col-span-2">
+                    <div class="sm:col-span-12">
                         <p class="text-xs text-gray-400 mb-1">Descripción</p>
                         <textarea readonly rows="4"
-                                  class="w-full border border-gray-200 bg-gray-50 rounded-5px py-2 px-3 text-sm text-gray-700 resize-none"
+                                  class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 resize-none"
                                   :value="ticket.descripcion"></textarea>
+                    </div>
+                    <div class="sm:col-span-12">
+
+                        <p class="text-xs text-gray-400 mb-1">Adjuntos</p>
+
+                        <div class="space-y-2">
+                            <a v-for="arch in ticket.archivos" :key="arch.id"
+                               :href="arch.ruta" target="_blank"
+                               class="flex items-center gap-3 p-2.5 border border-gray-200 rounded-[4px] hover:border-blue-300 hover:bg-blue-50/40 transition group">
+                                <i class="fa-solid fa-file text-gray-300 group-hover:text-blue-400 text-lg w-5 text-center"></i>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-medium text-gray-700 truncate">{{ arch.nombre }}</p>
+                                    <p class="text-xs text-gray-400">{{ arch.peso }}</p>
+                                </div>
+                                <i class="fa-solid fa-download text-gray-300 group-hover:text-blue-400 text-xs"></i>
+                            </a>
+                        </div>
                     </div>
 
                 </div>
             </div>
 
-            <!-- ── Archivos adjuntos ─────────────────────────────────── -->
-            <div v-if="ticket.archivos?.length" class="bg-white border border-gray-200 rounded-5px p-6 space-y-3">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <i class="fa-solid fa-paperclip mr-1"></i>Archivos adjuntos
-                </p>
-                <div class="space-y-2">
-                    <a v-for="arch in ticket.archivos" :key="arch.id"
-                       :href="arch.ruta" target="_blank"
-                       class="flex items-center gap-3 p-2.5 border border-gray-200 rounded-5px hover:border-blue-300 hover:bg-blue-50/40 transition group">
-                        <i class="fa-solid fa-file text-gray-300 group-hover:text-blue-400 text-lg w-5 text-center"></i>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-medium text-gray-700 truncate">{{ arch.nombre }}</p>
-                            <p class="text-xs text-gray-400">{{ arch.peso }}</p>
-                        </div>
-                        <i class="fa-solid fa-download text-gray-300 group-hover:text-blue-400 text-xs"></i>
-                    </a>
-                </div>
-            </div>
 
             <!-- ── Clasificación ─────────────────────────────────────── -->
-            <div class="bg-white border border-blue-200 rounded-5px p-6 space-y-4">
+            <div class="bg-white border border-blue-200 rounded-[4px] p-6 space-y-4">
                 <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">
                     <i class="fa-solid fa-tags mr-1"></i>Clasificación
                 </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
 
                     <!-- Tipo (filtro, no se guarda) -->
-                    <div>
+                    <div class="sm:col-span-6">
                         <p class="text-xs text-gray-500 mb-1 font-medium">Tipo</p>
                         <select v-model="tipoSeleccionado" :class="selectClass">
                             <option :value="null">— Todos los tipos —</option>
@@ -190,8 +182,24 @@ const selectErrorClass = 'w-full border border-red-400 rounded-5px py-2 px-3 tex
                         </select>
                     </div>
 
+                    <!-- Prioridad -->
+                    <div class="sm:col-span-6">
+                        <p class="text-xs text-gray-500 mb-1 font-medium">
+                            Prioridad <span class="text-red-500">*</span>
+                        </p>
+                        <select v-model="form.prioridad_id"
+                                :class="form.errors.prioridad_id ? selectErrorClass : selectClass">
+                            <option :value="null">— Seleccione una prioridad —</option>
+                            <option v-for="p in prioridades" :key="p.id" :value="p.id">
+                                {{ p.label }}
+                            </option>
+                        </select>
+                        <p v-if="form.errors.prioridad_id" class="text-xs text-red-500 mt-1">
+                            {{ form.errors.prioridad_id }}
+                        </p>
+                    </div>
                     <!-- Servicio -->
-                    <div>
+                    <div class="sm:col-span-12">
                         <p class="text-xs text-gray-500 mb-1 font-medium">
                             Servicio <span class="text-red-500">*</span>
                         </p>
@@ -208,25 +216,9 @@ const selectErrorClass = 'w-full border border-red-400 rounded-5px py-2 px-3 tex
                         </p>
                     </div>
 
-                    <!-- Prioridad -->
-                    <div>
-                        <p class="text-xs text-gray-500 mb-1 font-medium">
-                            Prioridad <span class="text-red-500">*</span>
-                        </p>
-                        <select v-model="form.prioridad_id"
-                                :class="form.errors.prioridad_id ? selectErrorClass : selectClass">
-                            <option :value="null">— Seleccione una prioridad —</option>
-                            <option v-for="p in prioridades" :key="p.id" :value="p.id">
-                                {{ p.label }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.prioridad_id" class="text-xs text-red-500 mt-1">
-                            {{ form.errors.prioridad_id }}
-                        </p>
-                    </div>
 
                     <!-- Especialista -->
-                    <div>
+                    <div class="sm:col-span-12">
                         <p class="text-xs text-gray-500 mb-1 font-medium">
                             Especialista <span class="text-red-500">*</span>
                         </p>
@@ -246,16 +238,17 @@ const selectErrorClass = 'w-full border border-red-400 rounded-5px py-2 px-3 tex
             </div>
 
             <!-- ── Botones acción ─────────────────────────────────────── -->
-            <div class="flex items-center justify-end gap-3">
-                <button type="button" @click="volver"
-                        class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-5px hover:bg-gray-50 transition">
-                    Cancelar
-                </button>
-                <button type="submit" :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium bg-blue-600 border-b-2 border-b-blue-700 text-white rounded-5px hover:bg-blue-700 disabled:opacity-50 transition">
-                    <i class="fa-solid fa-check"></i>
-                    Clasificar y Asignar
-                </button>
+            <div class="flex items-center justify-start gap-3">
+
+                <UiButton
+                    label="Clasificar y Asignar"
+                    variant="principal"
+                    color="blue"
+                    size="md"
+                    icon="fa-solid fa-check"
+                    :disabled="form.processing"
+                    @click="clasificar"
+                />
             </div>
 
         </form>

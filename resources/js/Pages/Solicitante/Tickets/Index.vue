@@ -154,7 +154,7 @@ const estadoLabel = (estado) => ({
             <!-- Switch de modo -->
             <div class="grid grid-cols-2 gap-3">
                 <button type="button" @click="seleccionarModo('1')"
-                    :class="['text-left p-4 border-2 rounded-5px transition',
+                    :class="['text-left p-4 border-2 rounded-[4px] transition',
                         modo === '1' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/40']">
                     <div class="flex items-start gap-3">
                         <div :class="['mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
@@ -168,7 +168,7 @@ const estadoLabel = (estado) => ({
                     </div>
                 </button>
                 <button type="button" @click="seleccionarModo('2')"
-                    :class="['text-left p-4 border-2 rounded-5px transition',
+                    :class="['text-left p-4 border-2 rounded-[4px] transition',
                         modo === '2' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/40']">
                     <div class="flex items-start gap-3">
                         <div :class="['mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
@@ -187,23 +187,23 @@ const estadoLabel = (estado) => ({
             <form v-if="modo" @submit.prevent="submit" class="space-y-4">
 
                 <!-- ── Card: Datos del Solicitante ──────────────────── -->
-                <div class="bg-white border border-gray-200 rounded-5px p-6 space-y-4">
+                <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Datos del Solicitante</h3>
                     <div>
                         <InputLabel value="Solicitante" />
                         <input :value="solicitante.nombre" readonly
-                            class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-5px py-2.5 px-2.5 text-sm cursor-default font-mono" />
+                            class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-[4px] py-2.5 px-2.5 text-sm cursor-default font-mono" />
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <InputLabel value="Dependencia" />
                             <input :value="solicitante.dependencia ?? '—'" readonly
-                                class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-5px py-2.5 px-2.5 text-xs cursor-default truncate" />
+                                class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-[4px] py-2.5 px-2.5 text-xs cursor-default truncate" />
                         </div>
                         <div>
                             <InputLabel value="Local" />
                             <input :value="solicitante.local ?? '—'" readonly
-                                class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-5px py-2.5 px-2.5 text-xs cursor-default truncate" />
+                                class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-[4px] py-2.5 px-2.5 text-xs cursor-default truncate" />
                         </div>
                     </div>
                     <div>
@@ -217,7 +217,7 @@ const estadoLabel = (estado) => ({
 
                 <!-- ── Card: Selector de servicio (solo modo 2) ─────── -->
                 <template v-if="modo === '2'">
-                    <div class="bg-white border border-gray-200 rounded-5px p-6 space-y-4">
+                    <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
                         <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Servicio</h3>
                         <div class="relative">
                             <InputLabel value="Servicio *" />
@@ -229,13 +229,13 @@ const estadoLabel = (estado) => ({
                                     @blur="setTimeout(() => showDropdown = false, 150)"
                                     type="text"
                                     placeholder="Buscar servicio..."
-                                    class="w-full border border-gray-300 focus:border-blue-500 rounded-5px py-2.5 pl-2.5 pr-8 bg-white text-sm focus:outline-blue-500"
+                                    class="w-full border border-gray-300 focus:border-blue-500 rounded-[4px] py-2.5 pl-2.5 pr-8 bg-white text-sm focus:outline-blue-500"
                                     :class="{ 'border-red-400': form.errors.servicio_id }"
                                     autocomplete="off"
                                 />
                                 <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                                 <div v-if="showDropdown"
-                                    class="absolute z-20 w-full bg-white border border-gray-200 rounded-5px shadow-lg mt-1 max-h-60 overflow-y-auto">
+                                    class="absolute z-20 w-full bg-white border border-gray-200 rounded-[4px] shadow-lg mt-1 max-h-60 overflow-y-auto">
                                     <template v-if="filteredCategorias.length">
                                         <template v-for="cat in filteredCategorias" :key="cat.id">
                                             <div class="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase bg-gray-50 sticky top-0">
@@ -255,7 +255,7 @@ const estadoLabel = (estado) => ({
                             <p v-if="form.errors.servicio_id" class="mt-1 text-xs text-red-500">{{ form.errors.servicio_id }}</p>
                         </div>
                         <div v-if="servicioSeleccionado?.descripcion"
-                            class="bg-blue-50 border border-blue-100 rounded-5px px-4 py-3 text-sm text-blue-700 leading-relaxed">
+                            class="bg-blue-50 border border-blue-100 rounded-[4px] px-4 py-3 text-sm text-blue-700 leading-relaxed">
                             {{ servicioSeleccionado.descripcion }}
                         </div>
                         <div v-if="servicioSeleccionado?.formatos?.length">
@@ -277,7 +277,7 @@ const estadoLabel = (estado) => ({
 
                 <!-- ── Card: Datos del Ticket ────────────────────────── -->
                 <div v-if="modo === '1' || servicioSeleccionado"
-                    class="bg-white border border-gray-200 rounded-5px p-6 space-y-5">
+                    class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-5">
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Datos del Ticket</h3>
                     <div>
                         <InputLabel value="Asunto *" />
@@ -285,20 +285,20 @@ const estadoLabel = (estado) => ({
                             :class="{ 'border-red-400': form.errors.asunto }"
                             placeholder="Describa brevemente el motivo del ticket" maxlength="500" />
                         <input v-else :value="form.asunto" readonly
-                            class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-5px py-2.5 px-2.5 text-sm cursor-default" />
+                            class="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-[4px] py-2.5 px-2.5 text-sm cursor-default" />
                         <p v-if="form.errors.asunto" class="mt-1 text-xs text-red-500">{{ form.errors.asunto }}</p>
                     </div>
                     <div>
                         <InputLabel value="Descripción" />
                         <textarea v-model="form.descripcion" rows="5"
                             placeholder="Detalle el problema o solicitud (opcional)"
-                            class="mt-1 w-full border border-gray-300 focus:border-blue-500 rounded-5px py-2.5 px-2.5 text-sm focus:outline-blue-500 resize-none"
+                            class="mt-1 w-full border border-gray-300 focus:border-blue-500 rounded-[4px] py-2.5 px-2.5 text-sm focus:outline-blue-500 resize-none"
                             :class="{ 'border-red-400': form.errors.descripcion }"></textarea>
                         <p v-if="form.errors.descripcion" class="mt-1 text-xs text-red-500">{{ form.errors.descripcion }}</p>
                     </div>
                     <div>
                         <InputLabel value="Archivos adjuntos" />
-                        <label class="mt-1 flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-5px py-6 px-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition">
+                        <label class="mt-1 flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-[4px] py-6 px-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
                             <span class="text-sm text-gray-500">Arrastra archivos aquí o <span class="text-blue-500 underline">selecciona</span></span>
                             <span class="text-xs text-gray-400 mt-1">PDF, Word, Excel, imágenes — máx. 10 MB por archivo</span>
@@ -308,7 +308,7 @@ const estadoLabel = (estado) => ({
                         <p v-if="form.errors.archivos" class="mt-1 text-xs text-red-500">{{ form.errors.archivos }}</p>
                         <ul v-if="form.archivos.length" class="mt-2 space-y-1">
                             <li v-for="(f, i) in form.archivos" :key="i"
-                                class="flex items-center justify-between text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-5px px-3 py-1.5">
+                                class="flex items-center justify-between text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-[4px] px-3 py-1.5">
                                 <span class="truncate"><i class="fa-solid fa-file mr-1.5 text-gray-400"></i>{{ f.name }}</span>
                                 <button type="button" class="ml-2 text-gray-400 hover:text-red-500 transition flex-shrink-0"
                                     @click="form.archivos = form.archivos.filter((_, j) => j !== i)">
@@ -380,7 +380,7 @@ const estadoLabel = (estado) => ({
                             </td>
                             <td class="px-3 py-3 border-l border-l-gray-200 max-w-xs truncate">{{ ticket.asunto }}</td>
                             <td class="px-3 py-3 border-l border-l-gray-200 text-center">
-                                <span :class="['px-2 py-1 rounded-5px text-xs font-medium', estadoClase(ticket.estado)]">
+                                <span :class="['px-2 py-1 rounded-[4px] text-xs font-medium', estadoClase(ticket.estado)]">
                                     {{ estadoLabel(ticket.estado) }}
                                 </span>
                             </td>
@@ -390,13 +390,13 @@ const estadoLabel = (estado) => ({
                             <td class="px-3 py-3 border-l border-l-gray-200 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button type="button"
-                                        class="bg-blue-500 border-b-2 border-b-blue-600 text-white py-1.5 px-3 rounded-5px text-xs cursor-pointer hover:bg-blue-600 transition flex items-center gap-1.5"
+                                        class="bg-blue-500 border-b-2 border-b-blue-600 text-white py-1.5 px-3 rounded-[4px] text-xs cursor-pointer hover:bg-blue-600 transition flex items-center gap-1.5"
                                         @click="verDetalle(ticket)">
                                         <i class="fa-solid fa-eye"></i> Detalle
                                     </button>
                                     <button v-if="ticket.estado === 'ATENDIDO'" type="button"
                                         title="Dar conformidad"
-                                        class="bg-emerald-500 border-b-2 border-b-emerald-600 text-white py-1.5 px-3 rounded-5px text-xs cursor-pointer hover:bg-emerald-600 transition flex items-center gap-1.5"
+                                        class="bg-emerald-500 border-b-2 border-b-emerald-600 text-white py-1.5 px-3 rounded-[4px] text-xs cursor-pointer hover:bg-emerald-600 transition flex items-center gap-1.5"
                                         @click="abrirConformidad(ticket)">
                                         <i class="fa-solid fa-circle-check"></i> Conformidad
                                     </button>
@@ -428,7 +428,7 @@ const estadoLabel = (estado) => ({
                             </td>
                             <td class="px-3 py-3 border-l border-l-gray-200 max-w-xs truncate">{{ ticket.asunto }}</td>
                             <td class="px-3 py-3 border-l border-l-gray-200 text-center">
-                                <span :class="['px-2 py-1 rounded-5px text-xs font-medium', estadoClase(ticket.estado)]">
+                                <span :class="['px-2 py-1 rounded-[4px] text-xs font-medium', estadoClase(ticket.estado)]">
                                     {{ estadoLabel(ticket.estado) }}
                                 </span>
                             </td>
@@ -437,7 +437,7 @@ const estadoLabel = (estado) => ({
                             </td>
                             <td class="px-3 py-3 border-l border-l-gray-200 text-center">
                                 <button type="button"
-                                    class="bg-blue-300 border-b-2 border-b-blue-400 text-white py-1.5 px-3 rounded-5px text-xs cursor-pointer hover:bg-blue-400 transition flex items-center gap-1.5 mx-auto"
+                                    class="bg-blue-300 border-b-2 border-b-blue-400 text-white py-1.5 px-3 rounded-[4px] text-xs cursor-pointer hover:bg-blue-400 transition flex items-center gap-1.5 mx-auto"
                                     @click="verDetalle(ticket)">
                                     <i class="fa-solid fa-eye"></i> Detalle
                                 </button>
@@ -453,7 +453,7 @@ const estadoLabel = (estado) => ({
             <div v-if="modalDetalle"
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
                 @click.self="modalDetalle = false">
-                <div class="bg-white rounded-5px shadow-xl w-full max-w-3xl flex flex-col max-h-[90vh]">
+                <div class="bg-white rounded-[4px] shadow-xl w-full max-w-3xl flex flex-col max-h-[90vh]">
 
                     <!-- Header -->
                     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
@@ -462,7 +462,7 @@ const estadoLabel = (estado) => ({
                                 <p class="text-sm font-semibold text-gray-700">Detalle del ticket</p>
                                 <p class="text-xs text-gray-400">{{ ticketDetalle?.codigo }}</p>
                             </div>
-                            <span :class="['px-2 py-1 rounded-5px text-xs font-medium', estadoClase(ticketDetalle?.estado)]">
+                            <span :class="['px-2 py-1 rounded-[4px] text-xs font-medium', estadoClase(ticketDetalle?.estado)]">
                                 {{ estadoLabel(ticketDetalle?.estado) }}
                             </span>
                         </div>
@@ -490,7 +490,7 @@ const estadoLabel = (estado) => ({
                                 </div>
                                 <div>
                                     <p class="text-gray-400 mb-0.5">Estado</p>
-                                    <span :class="['px-2 py-1 rounded-5px text-xs font-medium', estadoClase(ticketDetalle?.estado)]">
+                                    <span :class="['px-2 py-1 rounded-[4px] text-xs font-medium', estadoClase(ticketDetalle?.estado)]">
                                         {{ estadoLabel(ticketDetalle?.estado) }}
                                     </span>
                                 </div>
@@ -511,12 +511,12 @@ const estadoLabel = (estado) => ({
 
                             <div v-if="ticketDetalle?.descripcion">
                                 <p class="text-xs text-gray-400 mb-1">Descripción</p>
-                                <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed bg-gray-50 border border-gray-100 rounded-5px px-3 py-2.5">{{ ticketDetalle?.descripcion }}</p>
+                                <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed bg-gray-50 border border-gray-100 rounded-[4px] px-3 py-2.5">{{ ticketDetalle?.descripcion }}</p>
                             </div>
 
                             <div v-if="ticketDetalle?.resolucion">
                                 <p class="text-xs text-gray-400 mb-1">Resolución</p>
-                                <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed bg-emerald-50 border border-emerald-100 rounded-5px px-3 py-2.5">{{ ticketDetalle?.resolucion }}</p>
+                                <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed bg-emerald-50 border border-emerald-100 rounded-[4px] px-3 py-2.5">{{ ticketDetalle?.resolucion }}</p>
                             </div>
 
                             <!-- Archivos -->
@@ -528,7 +528,7 @@ const estadoLabel = (estado) => ({
                                 <div v-else class="space-y-1.5">
                                     <a v-for="arch in ticketDetalle.archivos" :key="arch.id"
                                         :href="arch.ruta" target="_blank"
-                                        class="flex items-center gap-3 p-2.5 border border-gray-200 rounded-5px hover:border-blue-300 hover:bg-blue-50/40 transition group">
+                                        class="flex items-center gap-3 p-2.5 border border-gray-200 rounded-[4px] hover:border-blue-300 hover:bg-blue-50/40 transition group">
                                         <i class="fa-solid fa-file text-gray-300 group-hover:text-blue-400 text-lg w-5 text-center"></i>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-xs font-medium text-gray-700 truncate">{{ arch.nombre }}</p>
@@ -569,11 +569,11 @@ const estadoLabel = (estado) => ({
                                                 {{ estadoLabel(h.estado_anterior) }}
                                             </span>
                                             <i v-if="h.estado_anterior" class="fa-solid fa-arrow-right text-gray-300 text-xs"></i>
-                                            <span :class="['text-xs font-semibold px-2 py-0.5 rounded-5px', estadoClase(h.estado_nuevo)]">
+                                            <span :class="['text-xs font-semibold px-2 py-0.5 rounded-[4px]', estadoClase(h.estado_nuevo)]">
                                                 {{ estadoLabel(h.estado_nuevo) }}
                                             </span>
                                             <span v-if="h.es_conformidad"
-                                                class="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-5px font-medium">
+                                                class="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-[4px] font-medium">
                                                 Conformidad
                                             </span>
                                         </div>
@@ -594,7 +594,7 @@ const estadoLabel = (estado) => ({
             <div v-if="modalConformidad"
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
                 @click.self="modalConformidad = false">
-                <div class="bg-white rounded-5px shadow-xl w-full max-w-md mx-4">
+                <div class="bg-white rounded-[4px] shadow-xl w-full max-w-md mx-4">
                     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
                         <div>
                             <p class="text-sm font-semibold text-gray-700">Dar conformidad</p>

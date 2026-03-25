@@ -69,7 +69,7 @@ const variantColorClasses = computed(() => {
             rose:    'bg-rose-200    border-b-2 border-b-rose-300    text-rose-700    hover:bg-rose-300    hover:text-rose-800    focus:bg-rose-300    active:bg-rose-300    focus:ring-rose-200',
         },
         outline: {
-            gray:    'bg-white border border-gray-200    text-gray-700    hover:bg-gray-700    hover:text-gray-50    focus:bg-gray-50    active:bg-gray-50    focus:ring-gray-200',
+            gray:    'bg-white border border-gray-200    text-gray-700    hover:bg-gray-700    hover:text-gray-50    focus:bg-gray-700    active:bg-gray-700    focus:ring-gray-200',
             slate:   'bg-white border border-slate-200   text-slate-700   hover:bg-slate-700   hover:text-slate-50   focus:bg-slate-50   active:bg-slate-50   focus:ring-slate-200',
             zinc:    'bg-white border border-zinc-200    text-zinc-700    hover:bg-zinc-700    hover:text-zinc-50    focus:bg-zinc-50    active:bg-zinc-50    focus:ring-zinc-200',
             neutral: 'bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-700 hover:text-neutral-50 focus:bg-neutral-50 active:bg-neutral-50 focus:ring-neutral-200',

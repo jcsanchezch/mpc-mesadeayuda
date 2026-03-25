@@ -4,44 +4,53 @@ import {Link, usePage} from "@inertiajs/vue3";
 import imgLogoTextoDerecha from '../../images/logoTextoDerecha.png';
 import imgLogo from '../../images/logo.png';
 import {route} from "ziggy-js";
+import navigation from '../navigation.json';
 
 defineProps({
     collapsed: {type: Boolean, default: false}
 });
 
-const navigation = [
-    {
-        name: 'Mis Tickets',
-        icon: 'fa-regular fa-rectangle-list',
-        route: 'solicitante.index',
-        pattern: 'solicitante.index',
-    },
-    {
-        name: 'Mesa de Servicio',
-        icon: 'fa-solid fa-headset',
-        route: 'mesadeayuda.tickets.index',
-        pattern: 'mesadeayuda.tickets.index',
-    },
-];
+const appName = import.meta.env.VITE_APP_NAME ?? 'App Name';
 
-const openGroups = ref({});
+const isChildActive = (child) => {
+    if (!route().current(child.pattern)) return false;
+    if (!child.query) return true;
+    const url = new URL(window.location.href);
+    return Object.entries(child.query).every(([k, v]) => url.searchParams.get(k) === v);
+};
+
+const isGroupActive = (group) => group.children?.some(c => isChildActive(c)) ?? false;
+
+const openGroups = ref(
+    Object.fromEntries(navigation.filter(i => i.children).map(i => [i.name, isGroupActive(i)]))
+);
 const toggleGroup = (name) => {
     openGroups.value[name] = !openGroups.value[name];
 };
-const isGroupActive = (group) => group.children?.some(c => route().current(c.pattern)) ?? false;
+
+
+const childHref = (child) => {
+    const base = route(child.route);
+    if (!child.query) return base;
+    return base + '?' + new URLSearchParams(child.query).toString();
+};
+
 
 const page = usePage();
 const user = page.props.auth?.user;
+
+
+
 </script>
 
 <template>
     <!-- Logo -->
     <div
         :class="['flex flex-col items-center px-0 leading-4 transition-all duration-300', collapsed ? 'my-4' : 'my-8']">
-        <img :src="collapsed ? imgLogo : imgLogoTextoDerecha" :class="collapsed ? 'w-8' : 'w-36'" alt="Logo"/>
+        <img :src="collapsed ? imgLogo : imgLogoTextoDerecha" :class="collapsed ? 'w-10' : 'w-36'" alt="Logo"/>
         <div v-if="!collapsed"
              class="mt-3 px-6 py-2.5 text-center inline-block text-[20px] font-bold tracking-normal leading-6 bg-cyan-100 text-sky-700 border-b-2 border-b-cyan-200">
-            Mesa de Ayuda
+            {{appName}}
         </div>
     </div>
 
@@ -53,23 +62,12 @@ const user = page.props.auth?.user;
 
             <div v-if="collapsed" class="h-6"></div>
 
-            <Link :href="route('home')"
-                  :class="[
-                    route().current('home') ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-700',
-                    collapsed ? 'justify-center text-lg py-3' : ' text-sm py-2 ',
-                    'group flex items-center text-sm px-4 font-medium rounded-[4px]',
-                ]"
-                  :title="collapsed ? 'Home' : ''">
-                <i class="fa-regular fa-house" :class="collapsed ? ' ' : 'mr-1.5'"></i>
-                <span v-if="!collapsed">Home</span>
-            </Link>
-
             <template v-for="item in navigation" :key="item.name">
                 <!-- Enlace directo (sin children) -->
                 <Link v-if="!item.children"
                       :href="route(item.route)"
                       :class="[
-                        route().current(item.pattern) ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-700',
+                        route().current(item.pattern) ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-700',
                         collapsed ? 'justify-center text-lg py-3 ' : ' text-sm py-2 ',
                         'group flex items-center px-4 font-medium rounded-[4px]'
                     ]"
@@ -79,16 +77,16 @@ const user = page.props.auth?.user;
                 </Link>
 
                 <!-- colapsable (con children) -->
-                <div v-else class="-px-2">
+                <div v-else>
                     <button
-                        @click="!collapsed && toggleGroup(item.name)"
+                        @click="toggleGroup(item.name)"
                         :class="[
-                            isGroupActive(item) ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-700',
-                            collapsed ? 'justify-center' : 'justify-between',
-                            'w-full flex items-center px-4 py-3 text-sm font-medium rounded-[4px]'
+                            isGroupActive(item) || openGroups[item.name] ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-700',
+                            collapsed ? 'justify-center text-lg py-3' : 'text-sm py-2 justify-between',
+                            'w-full flex items-center px-4 text-sm font-medium rounded-[4px]'
                         ]"
                         :title="collapsed ? item.name : ''">
-                        <span class="flex items-center" :class="collapsed ? '' : ' gap-1.5'">
+                        <span class="flex items-center" :class="collapsed ? '' : 'gap-1.5'">
                             <i :class="[item.icon]"></i>
                             <span v-if="!collapsed">{{ item.name }}</span>
                         </span>
@@ -96,15 +94,22 @@ const user = page.props.auth?.user;
                            :class="['fa-solid fa-chevron-down text-xs transition-transform duration-200', openGroups[item.name] ? 'rotate-180' : '']">
                         </i>
                     </button>
-                    <div v-if="!collapsed && openGroups[item.name]"
-                         class="ml-3 mt-0.5 space-y-0.5 border-l border-gray-300 pl-2">
+
+                    <!-- Submenús (sidebar normal y colapsado) -->
+                    <div v-if="openGroups[item.name]" class=" mt-0.5 p-0.5 space-y-0.5 rounded-[4px] bg-gray-200 border-b-2 border-b-gray-200"
+                         :class="collapsed
+                            ? ' '
+                            : ' '">
                         <Link v-for="child in item.children" :key="child.name"
-                              :href="route(child.route)"
+                              :href="childHref(child)"
+                              :title="collapsed ? child.name : ''"
                               :class="[
-                                route().current(child.pattern) ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-700',
-                                'flex items-center px-4 py-3 text-sm font-medium rounded-[4px]'
+                                isChildActive(child) ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-300 hover:text-gray-700',
+                                collapsed ? 'justify-center py-2' : 'gap-2 px-4 py-2',
+                                'flex items-center text-sm font-medium rounded-[4px]'
                             ]">
-                            {{ child.name }}
+                            <i v-if="child.icon" :class="child.icon" class="text-xs w-3.5 text-center"></i>
+                            <span v-if="!collapsed">{{ child.name }}</span>
                         </Link>
                     </div>
                 </div>
@@ -118,8 +123,8 @@ const user = page.props.auth?.user;
         <Link :href="route('perfil')"
               :class="[
                 route().current('perfil') ? 'bg-blue-100 text-blue-700 border border-blue-100 ' : 'border border-gray-200 text-gray-700 hover:bg-gray-200 ',
-                collapsed ? ' justify-center ' : ' ' ,
-                ' group flex items-center text-sm px-4 py-3 font-medium rounded-[4px] '
+                collapsed ? ' justify-center py-3' : ' py-2 ' ,
+                ' group flex items-center text-sm px-4  font-medium rounded-[4px] '
             ]"
               :title="collapsed ? 'Mi Perfil' : ''">
             <i class="fa-regular fa-user" :class="collapsed ? ' ' : 'mr-1.5'"></i>
@@ -129,8 +134,8 @@ const user = page.props.auth?.user;
         </Link>
         <Link :href="route('logout')" method="post" as="button"
               :class="[
-                'w-full font-medium text-sm text-white bg-red-500 border border-red-200 hover:bg-red-600 hover:text-red-100 transition flex items-center justify-center rounded-[4px] px-4 py-3 ',
-                collapsed ? ' ' : 'gap-1.5'
+                'w-full font-medium text-sm text-white bg-red-500 border border-red-200 hover:bg-red-600 hover:text-red-100 transition flex items-center justify-center rounded-[4px] px-4',
+                collapsed ? 'justify-center py-3 ' : ' py-2.5 gap-1.5'
             ]"
               :title="collapsed ? 'Cerrar Sesión' : ''">
             <i class="fa-solid fa-right-from-bracket"></i>

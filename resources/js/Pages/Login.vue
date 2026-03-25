@@ -23,7 +23,7 @@ const submit = () => {
             <div class="flex flex-col items-center mt-8 mx-0">
                 <img :src="imgLogoTextoDerecha" class="w-48" alt="Logo" />
                 <div
-                    class="mt-2 px-8 py-4 text-center inline-block text-[24px] font-bold tracking-normal rounded-5px bg-cyan-100 border-b-2 border-b-cyan-200  text-sky-700 leading-none">
+                    class="mt-2 px-8 py-4 text-center inline-block text-[24px] font-bold tracking-normal rounded-[4px] bg-cyan-100 border-b-2 border-b-cyan-200  text-sky-700 leading-none">
                     Mesa de Servicio
                 </div>
             </div>

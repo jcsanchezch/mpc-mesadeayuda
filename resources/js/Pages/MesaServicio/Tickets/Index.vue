@@ -39,14 +39,14 @@ const prioridadClase = (nombre) => {
 
 <template>
     <AuthLayout>
-        <template #header>Mesa de Servicio — Tickets sin asignar</template>
+        <template #header>Mesa de Servicio</template>
 
         <div class="flex justify-start mb-4">
             <UiButton
                 label="Nuevo Ticket"
                 icon="fa-solid fa-plus"
                 size="sm"
-                        @click="router.visit(route('mesadeayuda.tickets.crear.vista'))"/>
+                        @click="router.visit(route('mesadeservicio.tickets.crear.vista'))"/>
         </div>
 
             <TableBase>
@@ -93,7 +93,7 @@ const prioridadClase = (nombre) => {
                             {{ ticket.fecha }}
                         </td>
                         <td class="px-1.5 py-2 border-l border-l-gray-200 text-center">
-                            <span class="px-2 py-1 rounded-5px text-xs font-medium text-nowrap" :class="estadoClase(ticket.estado)">
+                            <span class="px-2 py-1 rounded-[4px] text-xs font-medium text-nowrap" :class="estadoClase(ticket.estado)">
                                 {{ upperCase(estadoLabel(ticket.estado)) }}
                             </span>
                         </td>
@@ -101,7 +101,7 @@ const prioridadClase = (nombre) => {
                             {{ ticket.servicio ?? '—' }}
                         </td>
                         <td class="px-1.5 py-2 border-l border-l-gray-200 text-center">
-                            <span v-if="ticket.prioridad" class="px-2 py-1 rounded-5px text-xs font-medium" :class="prioridadClase(ticket.prioridad)">
+                            <span v-if="ticket.prioridad" class="px-2 py-1 rounded-[4px] text-xs font-medium" :class="prioridadClase(ticket.prioridad)">
                                 {{ prioridadLabel(ticket.prioridad) }}
                             </span>
                             <span v-else class="text-gray-300">—</span>
@@ -111,12 +111,12 @@ const prioridadClase = (nombre) => {
                                 <UiButton
                                     label="Ver"
                                     icon="fa-solid fa-eye"
-                                    @click="router.visit(route('mesadeayuda.tickets.ver', ticket.id))"
+                                    @click="router.visit(route('mesadeservicio.tickets.ver', ticket.id))"
                                 />
                                 <UiButton
                                     label="Clasificar"
                                     icon="fa-solid fa-tags"
-                                    @click="router.visit(route('mesadeayuda.tickets.clasificar.vista', ticket.id))"
+                                    @click="router.visit(route('mesadeservicio.tickets.clasificar.vista', ticket.id))"
                                 />
                             </div>
                         </td>

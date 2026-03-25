@@ -8,14 +8,28 @@ import {ref, computed} from 'vue';
 import {route} from 'ziggy-js';
 
 const props = defineProps({
-    canales:      {type: Array, default: () => []},
-    categorias:   {type: Array, default: () => []},
+    canales: {type: Array, default: () => []},
+    categorias: {type: Array, default: () => []},
     dependencias: {type: Array, default: () => []},
-    locales:      {type: Array, default: () => []},
+    locales: {type: Array, default: () => []},
+    tipos: {type: Array, default: () => []},
+    prioridades: {type: Array, default: () => []},
+    especialistas: {type: Array, default: () => []},
 });
 
 const modo = ref('1');
 const servicioSeleccionado = ref(null);
+const tipoSeleccionado = ref(null);
+const clasificarDespues = ref(false);
+
+const onClasificarDespuesChange = () => {
+    if (clasificarDespues.value) {
+        form.canal_id = '';
+        form.prioridad_id = null;
+        form.especialista_id = null;
+        tipoSeleccionado.value = null;
+    }
+};
 const searchServicio = ref('');
 const showDropdown = ref(false);
 
@@ -37,6 +51,8 @@ const form = useForm({
     asunto: '',
     celular: '',
     descripcion: '',
+    prioridad_id: null,
+    especialista_id: null,
     archivos: [],
 });
 
@@ -62,7 +78,7 @@ const onTrabajadorInput = async () => {
 
     debounceTimer = setTimeout(async () => {
         try {
-            const res = await fetch(route('mesadeayuda.trabajadores.buscar') + '?q=' + encodeURIComponent(q), {
+            const res = await fetch(route('mesadeservicio.trabajadores.buscar') + '?q=' + encodeURIComponent(q), {
                 headers: {'X-Requested-With': 'XMLHttpRequest'},
             });
             resultadosTrabajadores.value = await res.json();
@@ -182,7 +198,7 @@ const onSearchServicioInput = () => {
     showDropdown.value = true;
 };
 
-const cancelar = () => router.visit(route('mesadeayuda.tickets.index'));
+const cancelar = () => router.visit(route('mesadeservicio.tickets.index'));
 
 // ── Validación cliente ────────────────────────────────────────
 const hasAttemptedSubmit = ref(false);
@@ -199,7 +215,11 @@ const formErrors = computed(() => {
     } else if (!form.celular.startsWith('9')) {
         e.celular = 'El celular debe empezar con 9.';
     }
-    if (!form.canal_id) e.canal_id = 'Debe seleccionar un canal.';
+    if (!clasificarDespues.value) {
+        if (!form.canal_id) e.canal_id = 'Debe seleccionar un canal.';
+        if (!form.prioridad_id) e.prioridad_id = 'Debe seleccionar una prioridad.';
+        if (!form.especialista_id) e.especialista_id = 'Debe seleccionar un especialista.';
+    }
     if (!form.descripcion.trim()) e.descripcion = 'La descripción es obligatoria.';
     if (modo.value === '1') {
         if (!form.asunto.trim()) e.asunto = 'El asunto es obligatorio.';
@@ -228,10 +248,10 @@ const submit = () => {
         asunto: form.asunto,
         celular: form.celular,
         descripcion: form.descripcion,
-        archivos: form.archivos.map(f => ({ name: f.name, size: f.size, type: f.type })),
+        archivos: form.archivos.map(f => ({name: f.name, size: f.size, type: f.type})),
     });
     if (!isFormValid.value) return;
-    form.post(route('mesadeayuda.tickets.crear'), {
+    form.post(route('mesadeservicio.tickets.crear'), {
         forceFormData: true,
         onSuccess: () => cancelar(),
         onError: (errors) => console.log('[submit] server errors:', errors),
@@ -243,151 +263,151 @@ const submit = () => {
     <AuthLayout>
         <template #header>Mesa de Servicio — Nuevo Ticket</template>
 
-        <form @submit.prevent="submit" class="max-w-4xl space-y-4">
+        <form @submit.prevent="submit" class="max-w-6xl space-y-4">
 
             <!-- ── Solicitante ─────────────────────────────────────────── -->
-            <div class="bg-white border border-gray-200 rounded-5px p-6 space-y-4">
+            <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Solicitante</p>
-                <div class="space-y-4">
 
-                    <!-- Trabajador -->
-                    <div class="relative">
-                        <InputLabel value="Trabajador *"/>
-                        <div class="relative mt-1">
-                            <input
-                                v-model="searchTrabajador"
-                                @input="onTrabajadorInput"
-                                @blur="hideDropdownTrabajador"
-                                type="text"
-                                placeholder="Escriba DNI o nombre (mínimo 4 caracteres)..."
-                                class="w-full border border-gray-300 focus:border-blue-500 rounded-5px py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500"
-                                :class="{ 'border-red-400': ve('trabajador_id') }"
-                                autocomplete="off"
-                            />
-                            <i v-if="buscandoTrabajador"
-                               class="fa-solid fa-circle-notch fa-spin absolute right-2.5 top-1/2 -translate-y-1/2 text-blue-400 text-xs pointer-events-none"></i>
-                            <i v-else
-                               class="fa-solid fa-magnifying-glass absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
-                            <div v-if="showDropdownTrabajador"
-                                 class="absolute z-20 w-full bg-white border border-gray-200 rounded-5px shadow-lg mt-1 max-h-56 overflow-y-auto">
-                                <template v-if="resultadosTrabajadores.length">
-                                    <button v-for="trab in resultadosTrabajadores" :key="trab.id"
-                                            type="button"
-                                            @mousedown="selectTrabajador(trab)"
-                                            class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-                                        {{ trab.label }}
-                                    </button>
-                                </template>
-                                <div v-else-if="!buscandoTrabajador"
-                                     class="px-3 py-3 text-sm text-gray-400 text-center">
-                                    Sin resultados
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+
+                    <div class="sm:col-span-6">
+
+                        <!-- Trabajador -->
+                        <div class="relative">
+                            <InputLabel value="Trabajador *"/>
+                            <div class="relative mt-1">
+                                <input
+                                    v-model="searchTrabajador"
+                                    @input="onTrabajadorInput"
+                                    @blur="hideDropdownTrabajador"
+                                    type="text"
+                                    placeholder="DNI, Applidos o Nombres"
+                                    class="w-full border border-gray-300 focus:border-blue-500 rounded-[4px] py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500"
+                                    :class="{ 'border-red-400': ve('trabajador_id') }"
+                                    autocomplete="off"
+                                />
+                                <i v-if="buscandoTrabajador"
+                                   class="fa-solid fa-circle-notch fa-spin absolute right-2.5 top-1/2 -translate-y-1/2 text-blue-400 text-xs pointer-events-none"></i>
+                                <i v-else
+                                   class="fa-solid fa-magnifying-glass absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                                <div v-if="showDropdownTrabajador"
+                                     class="absolute z-20 w-full bg-white border border-gray-200 rounded-[4px] shadow-lg mt-1 max-h-56 overflow-y-auto">
+                                    <template v-if="resultadosTrabajadores.length">
+                                        <button v-for="trab in resultadosTrabajadores" :key="trab.id"
+                                                type="button"
+                                                @mousedown="selectTrabajador(trab)"
+                                                class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                            {{ trab.label }}
+                                        </button>
+                                    </template>
+                                    <div v-else-if="!buscandoTrabajador"
+                                         class="px-3 py-3 text-sm text-gray-400 text-center">
+                                        Sin resultados
+                                    </div>
                                 </div>
                             </div>
+                            <p v-if="ve('trabajador_id')" class="mt-1 text-xs text-red-500">{{
+                                    ve('trabajador_id')
+                                }}</p>
                         </div>
-                        <p v-if="ve('trabajador_id')" class="mt-1 text-xs text-red-500">{{ ve('trabajador_id') }}</p>
                     </div>
 
+                    <div class="sm:col-span-6">
 
-                    <!-- Dependencia -->
-                    <div class="relative">
-                        <InputLabel value="Dependencia"/>
-                        <div class="relative mt-1">
-                            <input
-                                v-model="searchDependencia"
-                                @input="onDependenciaInput"
-                                @focus="showDropdownDependencia = true"
-                                @blur="hideDropdownDependencia"
-                                type="text"
-                                placeholder="Buscar dependencia..."
-                                :class="['w-full border focus:border-blue-500 rounded-5px py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500', ve('dependencia_id') ? 'border-red-400' : 'border-gray-300']"
-                                autocomplete="off"
-                            />
-                            <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
-                            <div v-if="showDropdownDependencia"
-                                 class="absolute z-20 w-full bg-white border border-gray-200 rounded-5px shadow-lg mt-1 max-h-56 overflow-y-auto">
-                                <button v-for="dep in filteredDependencias" :key="dep.id"
-                                        type="button"
-                                        @mousedown="selectDependencia(dep)"
-                                        class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-                                    {{ dep.nombre }}
-                                </button>
-                                <div v-if="!filteredDependencias.length" class="px-3 py-3 text-sm text-gray-400 text-center">Sin coincidencias</div>
+                        <!-- Dependencia -->
+                        <div class="relative">
+                            <InputLabel value="Dependencia"/>
+                            <div class="relative mt-1">
+                                <input
+                                    v-model="searchDependencia"
+                                    @input="onDependenciaInput"
+                                    @focus="showDropdownDependencia = true"
+                                    @blur="hideDropdownDependencia"
+                                    type="text"
+                                    placeholder="Buscar dependencia..."
+                                    :class="['w-full border focus:border-blue-500 rounded-[4px] py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500', ve('dependencia_id') ? 'border-red-400' : 'border-gray-300']"
+                                    autocomplete="off"
+                                />
+                                <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                                <div v-if="showDropdownDependencia"
+                                     class="absolute z-20 w-full bg-white border border-gray-200 rounded-[4px] shadow-lg mt-1 max-h-56 overflow-y-auto">
+                                    <button v-for="dep in filteredDependencias" :key="dep.id"
+                                            type="button"
+                                            @mousedown="selectDependencia(dep)"
+                                            class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                        {{ dep.nombre }}
+                                    </button>
+                                    <div v-if="!filteredDependencias.length"
+                                         class="px-3 py-3 text-sm text-gray-400 text-center">Sin coincidencias
+                                    </div>
+                                </div>
                             </div>
+                            <p v-if="ve('dependencia_id')" class="mt-1 text-xs text-red-500">{{
+                                    ve('dependencia_id')
+                                }}</p>
                         </div>
-                        <p v-if="ve('dependencia_id')" class="mt-1 text-xs text-red-500">{{ ve('dependencia_id') }}</p>
+
                     </div>
 
-                    <!-- Local -->
-                    <div class="relative">
-                        <InputLabel value="Local"/>
-                        <div class="relative mt-1">
-                            <input
-                                v-model="searchLocal"
-                                @input="onLocalInput"
-                                @focus="showDropdownLocal = true"
-                                @blur="hideDropdownLocal"
-                                type="text"
-                                placeholder="Buscar local..."
-                                :class="['w-full border focus:border-blue-500 rounded-5px py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500', ve('local_id') ? 'border-red-400' : 'border-gray-300']"
-                                autocomplete="off"
-                            />
-                            <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
-                            <div v-if="showDropdownLocal"
-                                 class="absolute z-20 w-full bg-white border border-gray-200 rounded-5px shadow-lg mt-1 max-h-56 overflow-y-auto">
-                                <button v-for="loc in filteredLocales" :key="loc.id"
-                                        type="button"
-                                        @mousedown="selectLocal(loc)"
-                                        class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-                                    {{ loc.nombre }}{{ loc.direccion ? ` (${loc.direccion})` : '' }}
-                                </button>
-                                <div v-if="!filteredLocales.length" class="px-3 py-3 text-sm text-gray-400 text-center">Sin coincidencias</div>
+                    <div class="sm:col-span-6">
+                        <!-- Local -->
+                        <div class="relative">
+                            <InputLabel value="Local"/>
+                            <div class="relative mt-1">
+                                <input
+                                    v-model="searchLocal"
+                                    @input="onLocalInput"
+                                    @focus="showDropdownLocal = true"
+                                    @blur="hideDropdownLocal"
+                                    type="text"
+                                    placeholder="Buscar local..."
+                                    :class="['w-full border focus:border-blue-500 rounded-[4px] py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500', ve('local_id') ? 'border-red-400' : 'border-gray-300']"
+                                    autocomplete="off"
+                                />
+                                <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                                <div v-if="showDropdownLocal"
+                                     class="absolute z-20 w-full bg-white border border-gray-200 rounded-[4px] shadow-lg mt-1 max-h-56 overflow-y-auto">
+                                    <button v-for="loc in filteredLocales" :key="loc.id"
+                                            type="button"
+                                            @mousedown="selectLocal(loc)"
+                                            class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                        {{ loc.nombre }}{{ loc.direccion ? ` (${loc.direccion})` : '' }}
+                                    </button>
+                                    <div v-if="!filteredLocales.length"
+                                         class="px-3 py-3 text-sm text-gray-400 text-center">Sin coincidencias
+                                    </div>
+                                </div>
                             </div>
+                            <p v-if="ve('local_id')" class="mt-1 text-xs text-red-500">{{ ve('local_id') }}</p>
                         </div>
-                        <p v-if="ve('local_id')" class="mt-1 text-xs text-red-500">{{ ve('local_id') }}</p>
+
                     </div>
 
-                    <!-- Celular -->
-                    <div>
-                        <InputLabel value="Celular de contacto *"/>
-                        <TextInput v-model="form.celular" class="mt-1 w-full"
-                                   placeholder="" maxlength="9"
-                                   :class="{ 'border-red-400': ve('celular') }"/>
-                        <p v-if="ve('celular')" class="mt-1 text-xs text-red-500">{{ ve('celular') }}</p>
+                    <div class="sm:col-span-6">
+                        <!-- Celular -->
+                        <div>
+                            <InputLabel value="Celular de contacto *"/>
+                            <TextInput v-model="form.celular" class="mt-1 w-full"
+                                       placeholder="" maxlength="9"
+                                       :class="{ 'border-red-400': ve('celular') }"/>
+                            <p v-if="ve('celular')" class="mt-1 text-xs text-red-500">{{ ve('celular') }}</p>
+                        </div>
                     </div>
-
 
                 </div>
             </div>
 
-            <div class="bg-white border border-gray-200 rounded-5px p-6 space-y-4">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Canal de atenciòn</p>
-                <div class="space-y-4">
-                    <!-- Canal -->
-                    <div>
-                        <InputLabel value="Canal *"/>
-                        <select v-model="form.canal_id"
-                                class="mt-1 w-full border border-gray-300 focus:border-blue-500 rounded-5px py-2.5 px-3 text-sm bg-white focus:outline-blue-500"
-                                :class="{ 'border-red-400': ve('canal_id') }">
-                            <option value="" disabled>Seleccione un canal...</option>
-                            <option v-for="canal in canales" :key="canal.id" :value="canal.id">
-                                {{ canal.label }}
-                            </option>
-                        </select>
-                        <p v-if="ve('canal_id')" class="mt-1 text-xs text-red-500">{{ ve('canal_id') }}</p>
-                    </div>
-
-                </div>
-            </div>
 
             <!-- ── Ticket ──────────────────────────────────────────────── -->
-            <div class="bg-white border border-gray-200 rounded-5px p-6 space-y-4">
+            <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ticket</p>
                 <div class="space-y-4">
 
                     <!-- Switch de modo -->
                     <div class="flex gap-2">
                         <button type="button" @click="seleccionarModo('1')"
-                                :class="['w-full text-left p-4 border-2 rounded-5px transition',
+                                :class="['w-full text-left p-4 border-2 rounded-[4px] transition',
                                 modo === '1' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/40']">
                             <div class="flex items-start gap-3">
                                 <div :class="['mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
@@ -401,7 +421,7 @@ const submit = () => {
                             </div>
                         </button>
                         <button type="button" @click="seleccionarModo('2')"
-                                :class="['w-full text-left p-4 border-2 rounded-5px transition',
+                                :class="['w-full text-left p-4 border-2 rounded-[4px] transition',
                                 modo === '2' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/40']">
                             <div class="flex items-start gap-3">
                                 <div :class="['mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
@@ -439,13 +459,13 @@ const submit = () => {
                                     @blur="hideDropdown"
                                     type="text"
                                     placeholder="Buscar servicio..."
-                                    class="w-full border border-gray-300 focus:border-blue-500 rounded-5px py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500"
+                                    class="w-full border border-gray-300 focus:border-blue-500 rounded-[4px] py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500"
                                     :class="{ 'border-red-400': ve('servicio_id') }"
                                     autocomplete="off"
                                 />
                                 <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                                 <div v-if="showDropdown"
-                                     class="absolute z-20 w-full bg-white border border-gray-200 rounded-5px shadow-lg mt-1 max-h-60 overflow-y-auto">
+                                     class="absolute z-20 w-full bg-white border border-gray-200 rounded-[4px] shadow-lg mt-1 max-h-60 overflow-y-auto">
                                     <template v-if="filteredCategorias.length">
                                         <template v-for="cat in filteredCategorias" :key="cat.id">
                                             <div
@@ -467,7 +487,7 @@ const submit = () => {
                             <p v-if="ve('servicio_id')" class="mt-1 text-xs text-red-500">{{ ve('servicio_id') }}</p>
                         </div>
                         <div v-if="servicioSeleccionado?.descripcion"
-                             class="bg-gray-50 border border-gray-200 rounded-5px px-4 py-3 text-sm text-gray-600 leading-relaxed">
+                             class="bg-gray-50 border border-gray-200 rounded-[4px] px-4 py-3 text-sm text-gray-600 leading-relaxed">
                             {{ servicioSeleccionado.descripcion }}
                         </div>
                         <div v-if="servicioSeleccionado?.formatos?.length">
@@ -491,7 +511,7 @@ const submit = () => {
                         <InputLabel value="Descripción *"/>
                         <textarea v-model="form.descripcion" rows="5"
                                   placeholder="Detalle el problema o solicitud"
-                                  class="mt-1 w-full border border-gray-300 focus:border-blue-500 rounded-5px py-2.5 px-3 text-sm focus:outline-blue-500 resize-none"
+                                  class="mt-1 w-full border border-gray-300 focus:border-blue-500 rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 resize-none"
                                   :class="{ 'border-red-400': ve('descripcion') }"></textarea>
                         <p v-if="ve('descripcion')" class="mt-1 text-xs text-red-500">{{ ve('descripcion') }}</p>
                     </div>
@@ -500,7 +520,7 @@ const submit = () => {
                     <div>
                         <InputLabel value="Archivos adjuntos"/>
                         <label
-                            class="mt-1 flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-5px py-6 px-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition">
+                            class="mt-1 flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-[4px] py-6 px-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
                             <span class="text-sm text-gray-500">Arrastra archivos aquí o <span
                                 class="text-blue-500 underline">selecciona</span></span>
@@ -512,7 +532,7 @@ const submit = () => {
                         <p v-if="form.errors.archivos" class="mt-1 text-xs text-red-500">{{ form.errors.archivos }}</p>
                         <ul v-if="form.archivos.length" class="mt-2 space-y-1">
                             <li v-for="(f, i) in form.archivos" :key="i"
-                                class="flex items-center justify-between text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-5px px-3 py-1.5">
+                                class="flex items-center justify-between text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-[4px] px-3 py-1.5">
                                 <span class="truncate"><i class="fa-solid fa-file mr-1.5 text-gray-400"></i>{{ f.name }}</span>
                                 <button type="button"
                                         class="ml-2 text-gray-400 hover:text-red-500 transition flex-shrink-0"
@@ -526,6 +546,112 @@ const submit = () => {
                 </div>
             </div>
 
+
+
+
+
+
+
+            <!-- ── Clasificación ─────────────────────────────────────── -->
+            <div class="bg-white border border-blue-200 rounded-[4px] p-6 space-y-4">
+
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Clasificación</p>
+
+
+
+
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+
+                    <!-- Canal -->
+                    <div class="sm:col-span-12 flex items-center justify-start gap-3">
+
+                        <div class="flex items-center mb-4">
+                            <input
+
+                                v-model="clasificarDespues"
+                                @change="onClasificarDespuesChange"
+                                id="default-checkbox" type="checkbox" value="" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
+                            <label for="default-checkbox" class="select-none ms-2 text-sm font-medium text-heading">Clasificar después</label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+
+                    <!-- Canal -->
+                    <div class="sm:col-span-4">
+                        <InputLabel value="Canal *"/>
+                        <select v-model="form.canal_id"
+                                :disabled="clasificarDespues"
+                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
+                                :class="clasificarDespues
+                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                                    : ['bg-white border-gray-300 focus:border-blue-500', ve('canal_id') ? 'border-red-400' : '']">
+                            <option value="" disabled>Seleccione un canal...</option>
+                            <option v-for="canal in canales" :key="canal.id" :value="canal.id">
+                                {{ canal.label }}
+                            </option>
+                        </select>
+                        <p v-if="ve('canal_id')" class="mt-1 text-xs text-red-500">{{ ve('canal_id') }}</p>
+                    </div>
+
+                    <!-- Tipo -->
+                    <div class="sm:col-span-4">
+                        <InputLabel value="Tipo"/>
+                        <select v-model="tipoSeleccionado"
+                                :disabled="clasificarDespues"
+                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
+                                :class="clasificarDespues
+                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-white border-gray-300 focus:border-blue-500'">
+                            <option :value="null">— Seleccione un tipo —</option>
+                            <option v-for="tipo in tipos" :key="tipo.id" :value="tipo.id">
+                                {{ tipo.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Prioridad -->
+                    <div class="sm:col-span-4">
+                        <InputLabel value="Prioridad"/>
+                        <select v-model="form.prioridad_id"
+                                :disabled="clasificarDespues"
+                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
+                                :class="clasificarDespues
+                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                                    : ['bg-white border-gray-300 focus:border-blue-500', ve('prioridad_id') ? 'border-red-400' : '']">
+                            <option :value="null">— Seleccione una prioridad —</option>
+                            <option v-for="p in prioridades" :key="p.id" :value="p.id">
+                                {{ p.label }}
+                            </option>
+                        </select>
+                        <p v-if="ve('prioridad_id')" class="mt-1 text-xs text-red-500">{{ ve('prioridad_id') }}</p>
+                    </div>
+
+                    <!-- Especialista -->
+                    <div class="sm:col-span-12">
+                        <InputLabel value="Especialista"/>
+                        <select v-model="form.especialista_id"
+                                :disabled="clasificarDespues"
+                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
+                                :class="clasificarDespues
+                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                                    : ['bg-white border-gray-300 focus:border-blue-500', ve('especialista_id') ? 'border-red-400' : '']">
+                            <option :value="null">— Seleccione un especialista —</option>
+                            <option v-for="e in especialistas" :key="e.id" :value="e.id">
+                                {{ e.label }}
+                            </option>
+                        </select>
+                        <p v-if="ve('especialista_id')" class="mt-1 text-xs text-red-500">{{ ve('especialista_id') }}</p>
+                    </div>
+
+                </div>
+            </div>
+
+
+
             <!-- ── Acciones ────────────────────────────────────────────── -->
             <div class="flex items-center gap-3">
                 <UiButton
@@ -537,6 +663,8 @@ const submit = () => {
                     :disabled="form.processing"
                 />
             </div>
+
+
 
         </form>
     </AuthLayout>
