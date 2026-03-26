@@ -22,31 +22,38 @@
                 "pattern": "mesadeservicio.tickets.crear.vista"
             },
             {
-                "name": "Pendientes",
-                "icon": "fa-regular fa-clock",
-                "route": "mesadeservicio.tickets.index",
-                "query": { "estado": "pendiente" },
-                "pattern": "mesadeservicio.tickets.index"
-            },
-            {
                 "name": "Por Clasificar",
                 "icon": "fa-solid fa-tags",
                 "route": "mesadeservicio.tickets.index",
-                "query": { "estado": "por_clasificar" },
+                "query": { "estado": "EN_ESPERA" },
                 "pattern": "mesadeservicio.tickets.index"
             },
             {
-                "name": "Atendidos",
+                "name": "Por Atender",
                 "icon": "fa-solid fa-clipboard-check",
                 "route": "mesadeservicio.tickets.index",
-                "query": { "estado": "atendido" },
+                "query": { "estado": "ASIGNADO" },
+                "pattern": "mesadeservicio.tickets.index"
+            },
+            {
+                "name": "Por Conformidad",
+                "icon": "fa-regular fa-circle-check",
+                "route": "mesadeservicio.tickets.index",
+                "query": { "estado": "ATENDIDO" },
                 "pattern": "mesadeservicio.tickets.index"
             },
             {
                 "name": "Cerrados",
                 "icon": "fa-solid fa-lock",
                 "route": "mesadeservicio.tickets.index",
-                "query": { "estado": "cerrado" },
+                "query": { "estado": "CERRADO" },
+                "pattern": "mesadeservicio.tickets.index"
+            },
+            {
+                "name": "Todos",
+                "icon": "fa-solid fa-list",
+                "route": "mesadeservicio.tickets.index",
+                "query": {},
                 "pattern": "mesadeservicio.tickets.index"
             }
         ]

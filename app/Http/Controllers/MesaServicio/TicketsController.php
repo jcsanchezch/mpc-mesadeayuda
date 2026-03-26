@@ -27,19 +27,24 @@ use Inertia\Inertia;
 
 class TicketsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tickets = Ticket::with([
+        $estado = $request->input('estado');
+
+        $query = Ticket::with([
             'servicio.categoria',
             'solicitante',
             'prioridad',
             'historial.estadoNuevo',
             'historial.user',
             'archivos.archivo',
-        ])
-            ->whereNull('especialista_id')
-            ->latest()
-            ->get()
+        ])->latest();
+
+        if ($estado) {
+            $query->where('estado', $estado);
+        }
+
+        $tickets = $query->get()
             ->map(fn($t) => [
                 'id' => $t->id,
                 'codigo' => $t->codigo,
@@ -164,12 +169,16 @@ class TicketsController extends Controller
         }
         $codigo = sprintf('%d-%05d', $year, $seq);
 
-        $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
+        $estadoInicio   = Estado::where('es_inicio', true)->firstOrFail();
+        $tieneClasificacion = !empty($validated['especialista_id']);
+        $estadoFinal    = $tieneClasificacion
+            ? Estado::where('codigo', 'ASIGNADO')->firstOrFail()
+            : $estadoInicio;
 
         // Verificar archivos antes de iniciar la transacción
         $archivos = $request->hasFile('archivos') ? $request->file('archivos') : [];
 
-        DB::transaction(function () use ($validated, $trabajador, $codigo, $estadoInicio, $archivos) {
+        DB::transaction(function () use ($validated, $trabajador, $codigo, $estadoInicio, $estadoFinal, $tieneClasificacion, $archivos) {
             $ticket = Ticket::create([
                 'codigo'           => $codigo,
                 'solicitante_id'   => $trabajador->id,
@@ -178,7 +187,7 @@ class TicketsController extends Controller
                 'canal_id'         => $validated['canal_id'],
                 'servicio_id'      => $validated['servicio_id'] ?? null,
                 'servicio_directo' => $validated['modo'] === '2',
-                'estado'           => $estadoInicio->codigo,
+                'estado'           => $estadoFinal->codigo,
                 'asunto'           => $validated['asunto'],
                 'celular'          => $validated['celular'],
                 'descripcion'      => $validated['descripcion'],
@@ -195,6 +204,18 @@ class TicketsController extends Controller
                 'es_conformidad'     => false,
                 'created_at'         => now(),
             ]);
+
+            if ($tieneClasificacion) {
+                TicketHistorial::create([
+                    'ticket_id'          => $ticket->id,
+                    'estado_anterior_id' => $estadoInicio->id,
+                    'estado_nuevo_id'    => $estadoFinal->id,
+                    'user_id'            => Auth::id(),
+                    'comentario'         => 'Ticket clasificado al momento de la creación.',
+                    'es_conformidad'     => false,
+                    'created_at'         => now(),
+                ]);
+            }
 
             foreach ($archivos as $file) {
                 $carpeta  = "tickets/{$codigo}";
