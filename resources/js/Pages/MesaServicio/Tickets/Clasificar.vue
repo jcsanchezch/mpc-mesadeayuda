@@ -4,6 +4,7 @@ import {useForm, router} from '@inertiajs/vue3';
 import {computed, ref, watch} from 'vue';
 import {route} from 'ziggy-js';
 import UiButton from "@/Components/Buttons/UiButton.vue";
+import InputLabel from "@/Components/InputLabel.vue";
 
 const props = defineProps({
     ticket:        {type: Object, required: true},
@@ -163,79 +164,6 @@ const selectErrorClass = 'w-full border border-red-400 rounded-[4px] py-2 px-3 t
                 </div>
             </div>
 
-
-            <!-- ── Clasificación ─────────────────────────────────────── -->
-            <div class="bg-white border border-blue-200 rounded-[4px] p-6 space-y-4">
-                <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                    <i class="fa-solid fa-tags mr-1"></i>Clasificación
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
-
-                    <!-- Tipo (filtro, no se guarda) -->
-                    <div class="sm:col-span-6">
-                        <p class="text-xs text-gray-500 mb-1 font-medium">Tipo</p>
-                        <select v-model="tipoSeleccionado" :class="selectClass">
-                            <option :value="null">— Todos los tipos —</option>
-                            <option v-for="tipo in tipos" :key="tipo.id" :value="tipo.id">
-                                {{ tipo.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Prioridad -->
-                    <div class="sm:col-span-6">
-                        <p class="text-xs text-gray-500 mb-1 font-medium">
-                            Prioridad <span class="text-red-500">*</span>
-                        </p>
-                        <select v-model="form.prioridad_id"
-                                :class="form.errors.prioridad_id ? selectErrorClass : selectClass">
-                            <option :value="null">— Seleccione una prioridad —</option>
-                            <option v-for="p in prioridades" :key="p.id" :value="p.id">
-                                {{ p.label }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.prioridad_id" class="text-xs text-red-500 mt-1">
-                            {{ form.errors.prioridad_id }}
-                        </p>
-                    </div>
-                    <!-- Servicio -->
-                    <div class="sm:col-span-12">
-                        <p class="text-xs text-gray-500 mb-1 font-medium">
-                            Servicio <span class="text-red-500">*</span>
-                        </p>
-                        <select v-model="form.servicio_id"
-                                :class="form.errors.servicio_id ? selectErrorClass : selectClass">
-                            <option :value="null">— Seleccione un servicio —</option>
-                            <option v-for="s in serviciosFiltrados" :key="s.id" :value="s.id">
-                                {{ s.nombre }}
-                                <template v-if="s.categoria"> — {{ s.categoria }}</template>
-                            </option>
-                        </select>
-                        <p v-if="form.errors.servicio_id" class="text-xs text-red-500 mt-1">
-                            {{ form.errors.servicio_id }}
-                        </p>
-                    </div>
-
-
-                    <!-- Especialista -->
-                    <div class="sm:col-span-12">
-                        <p class="text-xs text-gray-500 mb-1 font-medium">
-                            Especialista <span class="text-red-500">*</span>
-                        </p>
-                        <select v-model="form.especialista_id"
-                                :class="form.errors.especialista_id ? selectErrorClass : selectClass">
-                            <option :value="null">— Seleccione un especialista —</option>
-                            <option v-for="e in especialistas" :key="e.id" :value="e.id">
-                                {{ e.label }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.especialista_id" class="text-xs text-red-500 mt-1">
-                            {{ form.errors.especialista_id }}
-                        </p>
-                    </div>
-
-                </div>
-            </div>
 
             <!-- ── Botones acción ─────────────────────────────────────── -->
             <div class="flex items-center justify-start gap-3">

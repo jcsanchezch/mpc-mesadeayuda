@@ -6,9 +6,9 @@ import {route} from 'ziggy-js';
 import UiButton from "@/Components/Buttons/UiButton.vue";
 
 const props = defineProps({
-    ticket:      {type: Object, required: true},
-    estados:     {type: Array,  default: () => []},
-    prioridades: {type: Array,  default: () => []},
+    ticket: {type: Object, required: true},
+    estados: {type: Array, default: () => []},
+    prioridades: {type: Array, default: () => []},
 });
 
 const estadoMap = computed(() =>
@@ -37,7 +37,7 @@ const clasificar = () => router.visit(route('mesadeservicio.tickets.clasificar.v
     <AuthLayout>
         <template #header>Mesa de Servicio — Ticket {{ ticket.codigo }}</template>
 
-        <div class="max-w-4xl space-y-4">
+        <div class="max-w-6xl space-y-4">
 
             <!-- ── Botón volver / clasificar ────────────────────────── -->
             <div class="flex items-center justify-between">
@@ -48,7 +48,7 @@ const clasificar = () => router.visit(route('mesadeservicio.tickets.clasificar.v
                     size="md"
                     icon="fa-solid fa-arrow-left"
                     @click="pendientes"
-                    />
+                />
 
                 <UiButton
                     label="Clasificar"
@@ -60,131 +60,141 @@ const clasificar = () => router.visit(route('mesadeservicio.tickets.clasificar.v
                 />
             </div>
 
-            <!-- ── Datos del solicitante ─────────────────────────────── -->
+
+            <!-- ── Ticket ──────────────────────────────────── -->
             <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+
+                    <div class="sm:col-span-2">
+                        <p class="text-xs text-gray-400 mb-1">Código</p>
+                        <span class="px-2 py-1 rounded-[4px] text-sm font-medium bg-gray-200 text-gray-700">
+                            {{ ticket.codigo }}
+                        </span>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <p class="text-xs text-gray-400 mb-1">Estado</p>
+                        <span class="px-2 py-1 rounded-[4px] text-sm font-medium"
+                              :class="estadoClase(ticket.estado)">
+                                {{ estadoLabel(ticket.estado) }}
+                        </span>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <p class="text-xs text-gray-400 mb-1">Prioridad</p>
+                        <span v-if="ticket.prioridad"
+                              class="px-2 py-1 rounded-[4px] text-sm font-medium"
+                              :class="prioridadClase(ticket.prioridad)">
+                                {{ prioridadLabel(ticket.prioridad) }}
+                            </span>
+                        <span v-else class="text-gray-400 text-sm">—</span>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <p class="text-xs text-gray-400 mb-1">Canal</p>
+
+                        <span class="px-2 py-1 rounded-[4px] text-sm font-medium bg-gray-200 text-gray-700">
+                            {{ ticket.canal ?? '—' }}
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="h-4 border-b border-gray-200"></div>
+
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Solicitante</p>
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
 
-                    <div class="sm:col-span-9">
+                    <div class="sm:col-span-6">
                         <p class="text-xs text-gray-400 mb-1">Solicitante</p>
                         <input type="text" readonly :value="`${ticket.dni ?? '—'} ${ticket.solicitante}`"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 font-mono"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700"/>
                     </div>
 
-
-                    <div class="sm:col-span-3">
-                        <p class="text-xs text-gray-400 mb-1">Celular de contacto</p>
-                        <input type="text" readonly :value="ticket.celular ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 font-mono"/>
-                    </div>
                     <div class="sm:col-span-6">
                         <p class="text-xs text-gray-400 mb-1">Dependencia</p>
                         <input type="text" readonly :value="ticket.dependencia ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700"/>
                     </div>
 
                     <div class="sm:col-span-6">
                         <p class="text-xs text-gray-400 mb-1">Local</p>
                         <input type="text" readonly :value="ticket.local ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700"/>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <p class="text-xs text-gray-400 mb-1">Celular de contacto</p>
+                        <input type="text" readonly :value="ticket.celular ?? '—'"
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700"/>
                     </div>
 
                 </div>
-            </div>
 
-            <!-- ── Datos del ticket ──────────────────────────────────── -->
-            <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-4">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ticket</p>
+                <div class="h-4 border-b border-gray-200"></div>
+
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider"> Ticket </p>
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
-
-                    <div class="sm:col-span-6">
-                        <p class="text-xs text-gray-400 mb-1">Código</p>
-                        <input type="text" readonly :value="ticket.codigo"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 font-medium"/>
-                    </div>
-
-                    <div class="sm:col-span-6">
-                        <p class="text-xs text-gray-400 mb-1">Estado</p>
-                        <div class="py-2">
-                            <span class="px-2 py-1 rounded-[4px] text-xs font-medium"
-                                  :class="estadoClase(ticket.estado)">
-                                {{ estadoLabel(ticket.estado) }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-6">
-                        <p class="text-xs text-gray-400 mb-1">Canal</p>
-                        <input type="text" readonly :value="ticket.canal ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
-                    </div>
-
-                    <div class="sm:col-span-6">
-                        <p class="text-xs text-gray-400 mb-1">Prioridad</p>
-                        <div class="py-2 px-3">
-                            <span v-if="ticket.prioridad"
-                                  class="px-2 py-1 rounded-[4px] text-xs font-medium"
-                                  :class="prioridadClase(ticket.prioridad)">
-                                {{ prioridadLabel(ticket.prioridad) }}
-                            </span>
-                            <span v-else class="text-gray-400 text-sm">—</span>
-                        </div>
-                    </div>
-
-
-                    <div class="sm:col-span-12">
-                        <p class="text-xs text-gray-400 mb-1">Categoría</p>
-                        <input type="text" readonly :value="ticket.categoria ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
-                    </div>
-
-                    <div class="sm:col-span-12">
-                        <p class="text-xs text-gray-400 mb-1">Servicio</p>
-                        <input type="text" readonly :value="ticket.servicio ?? '—'"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
-                    </div>
 
                     <div class="sm:col-span-12">
                         <p class="text-xs text-gray-400 mb-1">Asunto</p>
                         <input type="text" readonly :value="ticket.asunto"
-                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700"/>
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700"/>
                     </div>
 
                     <div class="sm:col-span-12">
                         <p class="text-xs text-gray-400 mb-1">Descripción</p>
-                        <textarea readonly rows="4"
-                                  class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 resize-none"
+                        <textarea readonly rows="2"
+                                  class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700 resize-none"
                                   :value="ticket.descripcion"></textarea>
                     </div>
 
-                    <div v-if="ticket.resolucion" class="sm:col-span-12">
-                        <p class="text-xs text-gray-400 mb-1">Resolución</p>
-                        <textarea readonly rows="3"
-                                  class="w-full border border-gray-200 bg-gray-50 rounded-[4px] py-2 px-3 text-sm text-gray-700 resize-none"
-                                  :value="ticket.resolucion"></textarea>
+                    <div class="sm:col-span-12">
+                        <p class="text-xs text-gray-400 mb-1">Archivos adjuntos</p>
+                        <div v-if="ticket.archivos?.length" class="bg-white rounded-[4px]">
+                            <div class="space-y-1">
+                                <a v-for="arch in ticket.archivos" :key="arch.id"
+                                   :href="arch.ruta" target="_blank"
+                                   class="flex items-center gap-3 p-2.5 border border-gray-200 rounded-[4px] hover:border-blue-300 hover:bg-blue-50/40 transition group">
+                                    <i class="fa-solid fa-file text-gray-300 group-hover:text-blue-400 text-lg w-5 text-center"></i>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-medium text-gray-700 truncate">{{ arch.nombre }}</p>
+                                        <p class="text-xs text-gray-400">{{ arch.peso }}</p>
+                                    </div>
+                                    <i class="fa-solid fa-download text-gray-300 group-hover:text-blue-400 text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div v-else class="bg-white rounded-[4px]">
+                            <div class="px-4">
+                                <span class="text-xs text-gray-400">Sin Archivos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-4 border-b border-gray-200"></div>
+
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Servicio</p>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+
+                    <div class="sm:col-span-12">
+                        <p class="text-xs text-gray-400 mb-1">Categoría</p>
+                        <input type="text" readonly :value="ticket.categoria ?? '—'"
+                               class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700"/>
                     </div>
 
+                    <div class="sm:col-span-12">
+                        <p class="text-xs text-gray-400 mb-1">Servicio</p>
+
+                        <textarea readonly rows="2"
+                                  class="w-full border border-gray-200 bg-gray-50 rounded-[4px] px-2 py-1.5 text-sm text-gray-700 resize-none"
+                                  :value="ticket.servicio ?? '—' "></textarea>
+                    </div>
                 </div>
             </div>
 
-            <!-- ── Archivos adjuntos ─────────────────────────────────── -->
-            <div v-if="ticket.archivos?.length" class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-3">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <i class="fa-solid fa-paperclip mr-1"></i>Archivos adjuntos
-                </p>
-                <div class="space-y-2">
-                    <a v-for="arch in ticket.archivos" :key="arch.id"
-                       :href="arch.ruta" target="_blank"
-                       class="flex items-center gap-3 p-2.5 border border-gray-200 rounded-[4px] hover:border-blue-300 hover:bg-blue-50/40 transition group">
-                        <i class="fa-solid fa-file text-gray-300 group-hover:text-blue-400 text-lg w-5 text-center"></i>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-medium text-gray-700 truncate">{{ arch.nombre }}</p>
-                            <p class="text-xs text-gray-400">{{ arch.peso }}</p>
-                        </div>
-                        <i class="fa-solid fa-download text-gray-300 group-hover:text-blue-400 text-xs"></i>
-                    </a>
-                </div>
-            </div>
+
 
             <!-- ── Historial ─────────────────────────────────────────── -->
             <div class="bg-white border border-gray-200 rounded-[4px] p-6 space-y-3">

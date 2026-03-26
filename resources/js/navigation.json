@@ -36,6 +36,13 @@
                 "pattern": "mesadeservicio.tickets.index"
             },
             {
+                "name": "Atendido",
+                "icon": "fa-solid fa-clipboard-check",
+                "route": "mesadeservicio.tickets.index",
+                "query": { "estado": "ATENDIENDO" },
+                "pattern": "mesadeservicio.tickets.index"
+            },
+            {
                 "name": "Por Conformidad",
                 "icon": "fa-regular fa-circle-check",
                 "route": "mesadeservicio.tickets.index",

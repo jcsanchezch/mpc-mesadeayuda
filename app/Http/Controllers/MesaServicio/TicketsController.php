@@ -90,11 +90,6 @@ class TicketsController extends Controller
 
     public function crearVista()
     {
-        $canales = Canal::where('es_aplicacion', false)
-        ->where('activo', true)
-            ->orderBy('label')
-            ->get(['id', 'codigo', 'label']);
-
         $categorias = Categoria::with(['servicios' => function ($q) {
             $q->where('activo', true)
                 ->with(['formatos.archivo'])
@@ -108,26 +103,10 @@ class TicketsController extends Controller
         $dependencias = Dependencia::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
         $locales = Local::where('activo', true)->orderBy('nombre')->get(['id', 'nombre', 'direccion']);
 
-        $tipos = Tipo::where('activo', true)->orderBy('label')->get(['id', 'codigo', 'label']);
-
-        $prioridades = Prioridad::where('activo', true)->orderBy('id')->get(['id', 'codigo', 'label']);
-
-        $especialistas = Especialista::where('activo', true)
-            ->with('trabajador')
-            ->get()
-            ->map(fn($e) => [
-                'id'    => $e->id,
-                'label' => trim("{$e->trabajador?->paterno} {$e->trabajador?->materno} {$e->trabajador?->nombres}"),
-            ]);
-
         return Inertia::render('MesaServicio/Tickets/Crear', [
-            'canales'       => $canales,
-            'categorias'    => $categorias,
-            'dependencias'  => $dependencias,
-            'locales'       => $locales,
-            'tipos'         => $tipos,
-            'prioridades'   => $prioridades,
-            'especialistas' => $especialistas,
+            'categorias'   => $categorias,
+            'dependencias' => $dependencias,
+            'locales'      => $locales,
         ]);
     }
 
@@ -137,16 +116,13 @@ class TicketsController extends Controller
             'trabajador_id'  => ['required', 'integer', 'exists:trabajadores,id'],
             'dependencia_id' => ['required', 'integer', 'exists:dependencias,id'],
             'local_id'       => ['required', 'integer', 'exists:locales,id'],
-            'canal_id'       => ['nullable', 'integer', 'exists:canales,id'],
-            'modo' => ['required', 'in:1,2'],
-            'servicio_id' => ['nullable', 'integer', 'exists:servicios,id'],
-            'asunto' => ['required_if:modo,1', 'nullable', 'string', 'max:500'],
-            'celular' => ['required', 'string', 'max:15'],
-            'descripcion' => ['required', 'string'],
-            'prioridad_id'    => ['nullable', 'integer', 'exists:prioridades,id'],
-            'especialista_id' => ['nullable', 'integer', 'exists:especialistas,id'],
-            'archivos' => ['nullable', 'array', 'max:10'],
-            'archivos.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
+            'modo'           => ['required', 'in:1,2'],
+            'servicio_id'    => ['nullable', 'integer', 'exists:servicios,id'],
+            'asunto'         => ['required_if:modo,1', 'nullable', 'string', 'max:500'],
+            'celular'        => ['required', 'string', 'max:15'],
+            'descripcion'    => ['required', 'string'],
+            'archivos'       => ['nullable', 'array', 'max:10'],
+            'archivos.*'     => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
         ]);
 
         if ($validated['modo'] === '2') {
@@ -169,30 +145,23 @@ class TicketsController extends Controller
         }
         $codigo = sprintf('%d-%05d', $year, $seq);
 
-        $estadoInicio   = Estado::where('es_inicio', true)->firstOrFail();
-        $tieneClasificacion = !empty($validated['especialista_id']);
-        $estadoFinal    = $tieneClasificacion
-            ? Estado::where('codigo', 'ASIGNADO')->firstOrFail()
-            : $estadoInicio;
+        $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
 
         // Verificar archivos antes de iniciar la transacción
         $archivos = $request->hasFile('archivos') ? $request->file('archivos') : [];
 
-        DB::transaction(function () use ($validated, $trabajador, $codigo, $estadoInicio, $estadoFinal, $tieneClasificacion, $archivos) {
+        DB::transaction(function () use ($validated, $trabajador, $codigo, $estadoInicio, $archivos) {
             $ticket = Ticket::create([
                 'codigo'           => $codigo,
                 'solicitante_id'   => $trabajador->id,
                 'dependencia_id'   => $validated['dependencia_id'],
                 'local_id'         => $validated['local_id'],
-                'canal_id'         => $validated['canal_id'],
                 'servicio_id'      => $validated['servicio_id'] ?? null,
                 'servicio_directo' => $validated['modo'] === '2',
-                'estado'           => $estadoFinal->codigo,
+                'estado'           => $estadoInicio->codigo,
                 'asunto'           => $validated['asunto'],
                 'celular'          => $validated['celular'],
                 'descripcion'      => $validated['descripcion'],
-                'prioridad_id'     => $validated['prioridad_id'] ?? null,
-                'especialista_id'  => $validated['especialista_id'] ?? null,
             ]);
 
             TicketHistorial::create([
@@ -204,18 +173,6 @@ class TicketsController extends Controller
                 'es_conformidad'     => false,
                 'created_at'         => now(),
             ]);
-
-            if ($tieneClasificacion) {
-                TicketHistorial::create([
-                    'ticket_id'          => $ticket->id,
-                    'estado_anterior_id' => $estadoInicio->id,
-                    'estado_nuevo_id'    => $estadoFinal->id,
-                    'user_id'            => Auth::id(),
-                    'comentario'         => 'Ticket clasificado al momento de la creación.',
-                    'es_conformidad'     => false,
-                    'created_at'         => now(),
-                ]);
-            }
 
             foreach ($archivos as $file) {
                 $carpeta  = "tickets/{$codigo}";

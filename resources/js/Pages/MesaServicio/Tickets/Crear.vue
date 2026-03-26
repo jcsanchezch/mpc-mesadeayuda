@@ -8,28 +8,13 @@ import {ref, computed} from 'vue';
 import {route} from 'ziggy-js';
 
 const props = defineProps({
-    canales: {type: Array, default: () => []},
     categorias: {type: Array, default: () => []},
     dependencias: {type: Array, default: () => []},
     locales: {type: Array, default: () => []},
-    tipos: {type: Array, default: () => []},
-    prioridades: {type: Array, default: () => []},
-    especialistas: {type: Array, default: () => []},
 });
 
 const modo = ref('1');
 const servicioSeleccionado = ref(null);
-const tipoSeleccionado = ref(null);
-const clasificarDespues = ref(false);
-
-const onClasificarDespuesChange = () => {
-    if (clasificarDespues.value) {
-        form.canal_id = '';
-        form.prioridad_id = null;
-        form.especialista_id = null;
-        tipoSeleccionado.value = null;
-    }
-};
 const searchServicio = ref('');
 const showDropdown = ref(false);
 
@@ -45,14 +30,11 @@ const form = useForm({
     trabajador_id: '',
     dependencia_id: '',
     local_id: '',
-    canal_id: '',
     modo: '1',
     servicio_id: null,
     asunto: '',
     celular: '',
     descripcion: '',
-    prioridad_id: null,
-    especialista_id: null,
     archivos: [],
 });
 
@@ -215,11 +197,6 @@ const formErrors = computed(() => {
     } else if (!form.celular.startsWith('9')) {
         e.celular = 'El celular debe empezar con 9.';
     }
-    if (!clasificarDespues.value) {
-        if (!form.canal_id) e.canal_id = 'Debe seleccionar un canal.';
-        if (!form.prioridad_id) e.prioridad_id = 'Debe seleccionar una prioridad.';
-        if (!form.especialista_id) e.especialista_id = 'Debe seleccionar un especialista.';
-    }
     if (!form.descripcion.trim()) e.descripcion = 'La descripción es obligatoria.';
     if (modo.value === '1') {
         if (!form.asunto.trim()) e.asunto = 'El asunto es obligatorio.';
@@ -236,20 +213,6 @@ const ve = (field) => form.errors[field] ?? (hasAttemptedSubmit.value ? formErro
 
 const submit = () => {
     hasAttemptedSubmit.value = true;
-    console.log('[submit] formErrors:', JSON.parse(JSON.stringify(formErrors.value)));
-    console.log('[submit] isFormValid:', isFormValid.value);
-    console.log('[submit] form data:', {
-        trabajador_id: form.trabajador_id,
-        dependencia_id: form.dependencia_id,
-        local_id: form.local_id,
-        canal_id: form.canal_id,
-        modo: form.modo,
-        servicio_id: form.servicio_id,
-        asunto: form.asunto,
-        celular: form.celular,
-        descripcion: form.descripcion,
-        archivos: form.archivos.map(f => ({name: f.name, size: f.size, type: f.type})),
-    });
     if (!isFormValid.value) return;
     form.post(route('mesadeservicio.tickets.crear'), {
         forceFormData: true,
@@ -509,7 +472,7 @@ const submit = () => {
                     <!-- Descripción (ambos modos) -->
                     <div>
                         <InputLabel value="Descripción *"/>
-                        <textarea v-model="form.descripcion" rows="5"
+                        <textarea v-model="form.descripcion" rows="3"
                                   placeholder="Detalle el problema o solicitud"
                                   class="mt-1 w-full border border-gray-300 focus:border-blue-500 rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 resize-none"
                                   :class="{ 'border-red-400': ve('descripcion') }"></textarea>
@@ -546,109 +509,6 @@ const submit = () => {
                 </div>
             </div>
 
-
-
-
-
-
-
-            <!-- ── Clasificación ─────────────────────────────────────── -->
-            <div class="bg-white border border-blue-200 rounded-[4px] p-6 space-y-4">
-
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Clasificación</p>
-
-
-
-
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
-
-                    <!-- Canal -->
-                    <div class="sm:col-span-12 flex items-center justify-start gap-3">
-
-                        <div class="flex items-center mb-4">
-                            <input
-
-                                v-model="clasificarDespues"
-                                @change="onClasificarDespuesChange"
-                                id="default-checkbox" type="checkbox" value="" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
-                            <label for="default-checkbox" class="select-none ms-2 text-sm font-medium text-heading">Clasificar después</label>
-                        </div>
-
-
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
-
-                    <!-- Canal -->
-                    <div class="sm:col-span-4">
-                        <InputLabel value="Canal *"/>
-                        <select v-model="form.canal_id"
-                                :disabled="clasificarDespues"
-                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
-                                :class="clasificarDespues
-                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
-                                    : ['bg-white border-gray-300 focus:border-blue-500', ve('canal_id') ? 'border-red-400' : '']">
-                            <option value="" disabled>Seleccione un canal...</option>
-                            <option v-for="canal in canales" :key="canal.id" :value="canal.id">
-                                {{ canal.label }}
-                            </option>
-                        </select>
-                        <p v-if="ve('canal_id')" class="mt-1 text-xs text-red-500">{{ ve('canal_id') }}</p>
-                    </div>
-
-                    <!-- Tipo -->
-                    <div class="sm:col-span-4">
-                        <InputLabel value="Tipo"/>
-                        <select v-model="tipoSeleccionado"
-                                :disabled="clasificarDespues"
-                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
-                                :class="clasificarDespues
-                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
-                                    : 'bg-white border-gray-300 focus:border-blue-500'">
-                            <option :value="null">— Seleccione un tipo —</option>
-                            <option v-for="tipo in tipos" :key="tipo.id" :value="tipo.id">
-                                {{ tipo.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Prioridad -->
-                    <div class="sm:col-span-4">
-                        <InputLabel value="Prioridad"/>
-                        <select v-model="form.prioridad_id"
-                                :disabled="clasificarDespues"
-                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
-                                :class="clasificarDespues
-                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
-                                    : ['bg-white border-gray-300 focus:border-blue-500', ve('prioridad_id') ? 'border-red-400' : '']">
-                            <option :value="null">— Seleccione una prioridad —</option>
-                            <option v-for="p in prioridades" :key="p.id" :value="p.id">
-                                {{ p.label }}
-                            </option>
-                        </select>
-                        <p v-if="ve('prioridad_id')" class="mt-1 text-xs text-red-500">{{ ve('prioridad_id') }}</p>
-                    </div>
-
-                    <!-- Especialista -->
-                    <div class="sm:col-span-12">
-                        <InputLabel value="Especialista"/>
-                        <select v-model="form.especialista_id"
-                                :disabled="clasificarDespues"
-                                class="mt-1 w-full border rounded-[4px] py-2.5 px-3 text-sm focus:outline-blue-500 transition-colors"
-                                :class="clasificarDespues
-                                    ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
-                                    : ['bg-white border-gray-300 focus:border-blue-500', ve('especialista_id') ? 'border-red-400' : '']">
-                            <option :value="null">— Seleccione un especialista —</option>
-                            <option v-for="e in especialistas" :key="e.id" :value="e.id">
-                                {{ e.label }}
-                            </option>
-                        </select>
-                        <p v-if="ve('especialista_id')" class="mt-1 text-xs text-red-500">{{ ve('especialista_id') }}</p>
-                    </div>
-
-                </div>
-            </div>
 
 
 
