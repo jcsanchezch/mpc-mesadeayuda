@@ -12,21 +12,21 @@ class ParametrosSeeder extends Seeder
         // ── Estados ───────────────────────────────────────────────────────────
         $estados = [
 
-['codigo' =>'REGISTRADO', 'label' => 'Registrado', 'labelSolicitante' => 'En Espera', 'text_color' => 'text-yellow-700', 'bg_color' => 'bg-yellow-200', 'es_inicio' => true, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+['codigo' =>'REGISTRADO', 'label' => 'Registrado', 'label_solicitante' => 'En Espera', 'text_color' => 'text-yellow-700', 'bg_color' => 'bg-yellow-200', 'es_inicio' => true, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
 
-['codigo' =>'ASIGNADO', 'label' => 'Asignado', 'labelSolicitante' => 'Asignado', 'text_color' => 'text-purple-700', 'bg_color' => 'bg-purple-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+['codigo' =>'ASIGNADO', 'label' => 'Asignado', 'label_solicitante' => 'Asignado', 'text_color' => 'text-purple-700', 'bg_color' => 'bg-purple-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
 
-['codigo' =>'PROGRAMADO', 'label' => 'Programado', 'labelSolicitante' => 'Programado', 'text_color' => 'text-indigo-700', 'bg_color' => 'bg-indigo-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+['codigo' =>'PROGRAMADO', 'label' => 'Programado', 'label_solicitante' => 'Programado', 'text_color' => 'text-indigo-700', 'bg_color' => 'bg-indigo-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
 
-['codigo' =>'ATENDIENDO', 'label' => 'Atendiendo', 'labelSolicitante' => 'Atendiendo', 'text_color' => 'text-blue-700', 'bg_color' => 'bg-blue-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+['codigo' =>'ATENDIENDO', 'label' => 'Atendiendo', 'label_solicitante' => 'Atendiendo', 'text_color' => 'text-blue-700', 'bg_color' => 'bg-blue-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
 
-['codigo' =>'INFORMACION', 'label' => 'Información', 'labelSolicitante' => 'Brindar Información', 'text_color' => 'text-orange-700', 'bg_color' => 'bg-orange-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
+['codigo' =>'INFORMACION', 'label' => 'Información', 'label_solicitante' => 'Brindar Información', 'text_color' => 'text-orange-700', 'bg_color' => 'bg-orange-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
 
-['codigo' =>'ATENDIDO', 'label' => 'Atendido', 'labelSolicitante' => 'Atendido', 'text_color' => 'text-emerald-700', 'bg_color' => 'bg-emerald-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
+['codigo' =>'ATENDIDO', 'label' => 'Atendido', 'label_solicitante' => 'Atendido', 'text_color' => 'text-emerald-700', 'bg_color' => 'bg-emerald-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
 
-['codigo' =>'CANCELADO', 'label' => 'Cancelado', 'labelSolicitante' => 'Cancelado', 'text_color' => 'text-red-700', 'bg_color' => 'bg-red-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
+['codigo' =>'CANCELADO', 'label' => 'Cancelado', 'label_solicitante' => 'Cancelado', 'text_color' => 'text-red-700', 'bg_color' => 'bg-red-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
 
-['codigo' =>'CERRADO', 'label' => 'Cerrado', 'labelSolicitante' => 'Cerrado', 'text_color' => 'text-gray-500', 'bg_color' => 'bg-gray-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
+['codigo' =>'CERRADO', 'label' => 'Cerrado', 'label_solicitante' => 'Cerrado', 'text_color' => 'text-gray-500', 'bg_color' => 'bg-gray-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
             /*
 Estados más usados en sistemas reales
 

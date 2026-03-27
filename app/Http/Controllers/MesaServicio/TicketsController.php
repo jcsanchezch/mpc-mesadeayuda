@@ -270,7 +270,7 @@ class TicketsController extends Controller
 
     public function clasificarVista(Ticket $ticket)
     {
-        if ($ticket->estado !== 'EN_ESPERA') {
+        if ($ticket->estado !== 'REGISTRADO') {
             return redirect()->route('mesadeservicio.tickets.ver', $ticket->id);
         }
 
@@ -361,7 +361,7 @@ class TicketsController extends Controller
 
     public function clasificar(Request $request, Ticket $ticket)
     {
-        if ($ticket->estado !== 'EN_ESPERA') {
+        if ($ticket->estado !== 'REGISTRADO') {
             return redirect()->route('mesadeservicio.tickets.ver', $ticket->id);
         }
 

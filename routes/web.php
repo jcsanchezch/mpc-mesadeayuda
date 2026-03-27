@@ -24,9 +24,10 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         Route::get('/trabajadores/buscar',[MesaServicioTicketsController::class, 'buscarTrabajador'])->name('trabajadores.buscar');
     });
 
-    Route::prefix('solicitante')->name('solicitante.')->group(function () {
-        Route::get('/',                              [TicketsController::class,      'index'])->name('index');
-        Route::post('/crear',                        [TicketsController::class,      'crearTicket'])->name('crear');
+    Route::prefix('mt')->name('solicitante.')->group(function () {
+        Route::get('/',                              [TicketsController::class, 'index'])->name('index');
+        Route::get('/crear',                         [TicketsController::class, 'crearVista'])->name('tickets.crear');
+        Route::post('/crear',                        [TicketsController::class, 'crearTicket'])->name('crear');
         Route::post('/tickets/{ticket}/conformidad', [TicketsController::class, 'conformidad'])->name('tickets.conformidad');
     });
 

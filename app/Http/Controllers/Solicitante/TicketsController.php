@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Archivo;
 use App\Models\Canal;
 use App\Models\Categoria;
+use App\Models\Dependencia;
 use App\Models\Estado;
+use App\Models\Local;
 use App\Models\Servicio;
 use App\Models\Ticket;
 use App\Models\TicketArchivo;
@@ -86,15 +88,57 @@ class TicketsController extends Controller
         $user       = Auth::user()->load('trabajador.dependencia', 'trabajador.local');
         $trabajador = $user->trabajador;
 
+        $dependencias = Dependencia::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
+        $locales      = Local::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
+
         return Inertia::render('Solicitante/Tickets/Index', [
-            'activos'     => $activos,
-            'cerrados'    => $cerrados,
-            'categorias'  => $categorias,
-            'solicitante' => [
-                'nombre'      => trim("{$user->dni} - {$user->paterno} {$user->materno} {$user->nombres}"),
-                'dependencia' => $trabajador?->dependencia?->nombre,
-                'local'       => $trabajador?->local?->nombre,
-                'celular'     => $trabajador?->celular,
+            'activos'      => $activos,
+            'cerrados'     => $cerrados,
+            'categorias'   => $categorias,
+            'dependencias' => $dependencias,
+            'locales'      => $locales,
+            'solicitante'  => [
+                'nombre'         => trim("{$user->dni} - {$user->paterno} {$user->materno} {$user->nombres}"),
+                'dependencia_id' => $trabajador?->dependencia_id,
+                'dependencia'    => $trabajador?->dependencia?->nombre,
+                'local_id'       => $trabajador?->local_id,
+                'local'          => $trabajador?->local?->nombre,
+                'celular'        => $trabajador?->celular,
+            ],
+        ]);
+    }
+
+    public function crearVista()
+    {
+        $categorias = Categoria::with(['servicios' => function ($q) {
+            $q->whereHas('tipo', fn($t) => $t->where('disponible_al_solicitante', true))
+              ->where('activo', true)
+              ->with(['formatos.archivo'])
+              ->orderBy('nombre');
+        }])
+        ->whereHas('servicios', function ($q) {
+            $q->whereHas('tipo', fn($t) => $t->where('disponible_al_solicitante', true))
+              ->where('activo', true);
+        })
+        ->where('activo', true)
+        ->orderBy('nombre')
+        ->get(['id', 'nombre']);
+
+        $user       = Auth::user()->load('trabajador.dependencia', 'trabajador.local');
+        $trabajador = $user->trabajador;
+
+        $dependencias = Dependencia::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
+        $locales      = Local::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
+
+        return Inertia::render('Solicitante/Tickets/Crear', [
+            'categorias'   => $categorias,
+            'dependencias' => $dependencias,
+            'locales'      => $locales,
+            'solicitante'  => [
+                'nombre'         => trim("{$user->dni} - {$user->paterno} {$user->materno} {$user->nombres}"),
+                'dependencia_id' => $trabajador?->dependencia_id,
+                'local_id'       => $trabajador?->local_id,
+                'celular'        => $trabajador?->celular,
             ],
         ]);
     }
@@ -102,13 +146,15 @@ class TicketsController extends Controller
     public function crearTicket(Request $request)
     {
         $validated = $request->validate([
-            'modo'        => ['required', 'in:1,2'],
-            'servicio_id' => ['nullable', 'integer', 'exists:servicios,id'],
-            'asunto'      => ['required', 'string', 'max:500'],
-            'celular'     => ['nullable', 'string', 'max:15'],
-            'descripcion' => ['nullable', 'string'],
-            'archivos'    => ['nullable', 'array', 'max:5'],
-            'archivos.*'  => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
+            'modo'           => ['required', 'in:1,2'],
+            'servicio_id'    => ['nullable', 'integer', 'exists:servicios,id'],
+            'dependencia_id' => ['nullable', 'integer', 'exists:dependencias,id'],
+            'local_id'       => ['nullable', 'integer', 'exists:locales,id'],
+            'asunto'         => ['required', 'string', 'max:500'],
+            'celular'        => ['nullable', 'string', 'max:15'],
+            'descripcion'    => ['nullable', 'string'],
+            'archivos'       => ['nullable', 'array', 'max:5'],
+            'archivos.*'     => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
         ]);
 
         if ($validated['modo'] === '2') {
@@ -128,15 +174,17 @@ class TicketsController extends Controller
         $canalMesa    = Canal::where('codigo', 'MESA_DE_SERVICIO')->firstOrFail();
 
         $ticket = Ticket::create([
-            'codigo'                    => $codigo,
-            'solicitante_id'            => Auth::id(),
-            'canal_id'                  => $canalMesa->id,
-            'servicio_id'               => $validated['servicio_id'] ?? null,
-            'servicio_directo'          => $validated['modo'] === '2',
-            'estado'                    => $estadoInicio->codigo,
-            'asunto'                    => $validated['asunto'],
-            'celular'                   => $validated['celular'] ?? null,
-            'descripcion'               => $validated['descripcion'] ?? null,
+            'codigo'           => $codigo,
+            'solicitante_id'   => Auth::id(),
+            'dependencia_id'   => $validated['dependencia_id'] ?? null,
+            'local_id'         => $validated['local_id'] ?? null,
+            'canal_id'         => $canalMesa->id,
+            'servicio_id'      => $validated['servicio_id'] ?? null,
+            'servicio_directo' => $validated['modo'] === '2',
+            'estado'           => $estadoInicio->codigo,
+            'asunto'           => $validated['asunto'],
+            'celular'          => $validated['celular'] ?? null,
+            'descripcion'      => $validated['descripcion'] ?? null,
         ]);
 
         TicketHistorial::create([

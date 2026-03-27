@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find D:Files_Dev_Phpmpc-mesadeayuda/database/migrations -name *ticket* -o -name *dependencia* -o -name *local*)",
+      "Bash(powershell -Command \"Get-Content storage/logs/laravel.log | Select-String ''message|exception|Error'' | Select-Object -Last 20\")"
+    ]
+  }
+}

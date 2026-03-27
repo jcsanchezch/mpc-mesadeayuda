@@ -22,10 +22,16 @@
                 "pattern": "mesadeservicio.tickets.crear.vista"
             },
             {
-                "name": "Por Clasificar",
+                "name": "En Proceso",
+                "icon": "fa-solid fa-bolt",
+                "route": "mesadeservicio.tickets.index",
+                "pattern": "mesadeservicio.tickets.index"
+            },
+            {
+                "name": "Por Asignar",
                 "icon": "fa-solid fa-tags",
                 "route": "mesadeservicio.tickets.index",
-                "query": { "estado": "EN_ESPERA" },
+                "query": { "estado": "REGISTRADO" },
                 "pattern": "mesadeservicio.tickets.index"
             },
             {
@@ -54,13 +60,6 @@
                 "icon": "fa-solid fa-lock",
                 "route": "mesadeservicio.tickets.index",
                 "query": { "estado": "CERRADO" },
-                "pattern": "mesadeservicio.tickets.index"
-            },
-            {
-                "name": "Todos",
-                "icon": "fa-solid fa-list",
-                "route": "mesadeservicio.tickets.index",
-                "query": {},
                 "pattern": "mesadeservicio.tickets.index"
             }
         ]

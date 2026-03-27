@@ -116,6 +116,7 @@ return new class extends Migration
             $table->id();
             $table->string('codigo', 30)->unique();
             $table->string('label', 100);
+            $table->string('label_solicitante', 100);
             $table->string('text_color', 100)->default('text-gray-700');
             $table->string('bg_color', 100)->default('text-gray-100');
             $table->boolean('es_inicio')->default(false)->comment('El ticket inicia con este estado');

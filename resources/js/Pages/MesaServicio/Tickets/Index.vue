@@ -80,13 +80,13 @@ const prioridadClase = (nombre) => {
                         <td class="px-1.5 py-2 border-l border-l-gray-200 whitespace-nowrap">
                             {{ ticket.dni ?? '—' }}
                         </td>
-                        <td class="px-1.5 py-2 border-l border-l-gray-200  whitespace-nowrap">
+                        <td class="px-1.5 py-2 border-l border-l-gray-200 whitespace-nowrap">
                             {{ ticket.solicitante }}
                         </td>
                         <td class="px-1.5 py-2 border-l border-l-gray-200 whitespace-nowrap">
                             {{ ticket.celular ?? '—' }}
                         </td>
-                        <td class="px-1.5 py-2 border-l border-l-gray-200 w-1/2 truncate">
+                        <td class="px-1.5 py-2 border-l border-l-gray-200 w-1/2">
                             {{ ticket.asunto }}
                         </td>
                         <td class="px-1.5 py-2 border-l border-l-gray-200 text-center whitespace-nowrap text-gray-500">
