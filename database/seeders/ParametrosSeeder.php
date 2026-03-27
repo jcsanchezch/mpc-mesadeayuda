@@ -10,16 +10,138 @@ class ParametrosSeeder extends Seeder
     public function run(): void
     {
         // ── Estados ───────────────────────────────────────────────────────────
-        // actor: 'ti' = personal TI debe actuar | 'solicitante' = solicitante debe actuar | null = estado final
         $estados = [
-            ['codigo' =>'EN_ESPERA', 'label' => 'En Espera', 'text_color' => 'text-yellow-700', 'bg_color' => 'bg-yellow-200', 'es_inicio' => true, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
-            ['codigo' =>'ASIGNADO', 'label' => 'Asignado', 'text_color' => 'text-purple-700', 'bg_color' => 'bg-purple-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
-            ['codigo' =>'PROGRAMADO', 'label' => 'Programado', 'text_color' => 'text-indigo-700', 'bg_color' => 'bg-indigo-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
-            ['codigo' =>'ATENDIENDO', 'label' => 'Atendiendo', 'text_color' => 'text-blue-700', 'bg_color' => 'bg-blue-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
-            ['codigo' =>'INFORMACION', 'label' => 'Información', 'text_color' => 'text-orange-700', 'bg_color' => 'bg-orange-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
-            ['codigo' =>'ATENDIDO', 'label' => 'Atendido', 'text_color' => 'text-emerald-700', 'bg_color' => 'bg-emerald-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
-            ['codigo' =>'CANCELADO', 'label' => 'Cancelado', 'text_color' => 'text-red-700', 'bg_color' => 'bg-red-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
-            ['codigo' =>'CERRADO', 'label' => 'Cerrado', 'text_color' => 'text-gray-500', 'bg_color' => 'bg-gray-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
+
+['codigo' =>'REGISTRADO', 'label' => 'Registrado', 'labelSolicitante' => 'En Espera', 'text_color' => 'text-yellow-700', 'bg_color' => 'bg-yellow-200', 'es_inicio' => true, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+
+['codigo' =>'ASIGNADO', 'label' => 'Asignado', 'labelSolicitante' => 'Asignado', 'text_color' => 'text-purple-700', 'bg_color' => 'bg-purple-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+
+['codigo' =>'PROGRAMADO', 'label' => 'Programado', 'labelSolicitante' => 'Programado', 'text_color' => 'text-indigo-700', 'bg_color' => 'bg-indigo-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+
+['codigo' =>'ATENDIENDO', 'label' => 'Atendiendo', 'labelSolicitante' => 'Atendiendo', 'text_color' => 'text-blue-700', 'bg_color' => 'bg-blue-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'ti', 'activo' => true],
+
+['codigo' =>'INFORMACION', 'label' => 'Información', 'labelSolicitante' => 'Brindar Información', 'text_color' => 'text-orange-700', 'bg_color' => 'bg-orange-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
+
+['codigo' =>'ATENDIDO', 'label' => 'Atendido', 'labelSolicitante' => 'Atendido', 'text_color' => 'text-emerald-700', 'bg_color' => 'bg-emerald-200', 'es_inicio' => false, 'es_fin' => false, 'actor' => 'solicitante', 'activo' => true],
+
+['codigo' =>'CANCELADO', 'label' => 'Cancelado', 'labelSolicitante' => 'Cancelado', 'text_color' => 'text-red-700', 'bg_color' => 'bg-red-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
+
+['codigo' =>'CERRADO', 'label' => 'Cerrado', 'labelSolicitante' => 'Cerrado', 'text_color' => 'text-gray-500', 'bg_color' => 'bg-gray-200', 'es_inicio' => false, 'es_fin' => true, 'actor' => null, 'activo' => true],
+            /*
+Estados más usados en sistemas reales
+
+Este es un flujo profesional (muy parecido a Jira / ServiceNow):
+
+🟢 1. Creación
+Nuevo (New / Open)
+→ Ticket recién creado, aún sin revisar
+🔵 2. Evaluación
+En revisión (Triaged / Under Review)
+→ Se valida información, se clasifica
+Asignado (Assigned)
+→ Ya tiene responsable o equipo
+🟡 3. Trabajo activo
+En progreso (In Progress)
+→ Se está trabajando en la solución
+En espera (On Hold / Pending)
+→ Bloqueado por:
+usuario
+proveedor externo
+otra área
+🟠 4. Resolución
+Resuelto (Resolved)
+→ Ya se solucionó, pero falta confirmación
+🔴 5. Cierre
+Cerrado (Closed)
+→ Usuario validó o pasó tiempo sin respuesta
+🧠 Estados adicionales (más maduros)
+
+En sistemas más completos puedes ver:
+
+Escalado (Escalated) → sube de nivel (L2, L3)
+Reabierto (Reopened) → problema volvió
+Cancelado (Cancelled) → ya no aplica
+Rechazado (Rejected) → solicitud inválida
+En validación (UAT / Verification) → usuario prueba solución
+🔁 Flujo típico completo
+Nuevo
+  ↓
+En revisión
+  ↓
+Asignado
+  ↓
+En progreso
+  ↓
+En espera (opcional)
+  ↓
+Resuelto
+  ↓
+Cerrado
+🏢 Recomendación profesional (muy importante)
+
+Para un sistema moderno de mesa de servicio:
+
+Mantén entre 5 y 8 estados máximo
+Evita complejidad innecesaria
+Usa estados claros para métricas SLA:
+tiempo de atención
+tiempo de resolución
+tiempos en espera
+💡 Ejemplo ideal (balanceado)
+
+Si estás diseñando tu sistema, te recomiendo este set:
+
+New
+Assigned
+In Progress
+Pending
+Resolved
+Closed
+Reopened (opcional)
+
+     Registro (Logged) → el ticket se crea
+Clasificación (Categorized) → se define tipo, prioridad
+Priorización (Prioritized) → impacto + urgencia
+Asignación (Assigned) → se deriva a un grupo
+Diagnóstico (In Progress) → análisis y solución
+Resolución (Resolved) → ya tiene solución
+Cierre (Closed) → validado con el usuario
+
+
+New
+Assigned
+In Progress
+Pending
+Resolved
+Closed
+Reopened
+
+            Roles (estructura ITSM real)
+Usuario (Requester) → crea el ticket
+Agente L1 (Mesa de servicio) → primer nivel
+Soporte L2 → técnico especializado
+Soporte L3 → expertos / desarrollo
+Gestor / Supervisor → monitorea SLA y escalaciones
+
+
+            3. Flujo con transiciones
+New
+ ↓ (L1 revisa)
+Assigned
+ ↓
+In Progress
+ ↓
+Pending  ↔  In Progress
+ ↓
+Resolved
+ ↓
+Closed
+
+Resolved → Reopened → Assigned
+
+
+             */
+
         ];
 
         foreach ($estados as $e) {
