@@ -61,26 +61,26 @@ VALUES ('Alcaldía', 'A', true, 2),
 
 create table trabajadores
 (
-    id                      bigserial
+    id              bigserial
         primary key,
-    dependencias_id               bigint                not null
+    dependencias_id bigint                not null
         constraint trabajadores_dependencias_id_fk
             references dependencias,
-    dni                     varchar(8)            not null
+    dni             varchar(8)            not null
         constraint trabajadores_dni_unique
             unique,
-    paterno                 varchar(100),
-    materno                 varchar(100),
-    nombres                 varchar(100),
+    paterno         varchar(100),
+    materno         varchar(100),
+    nombres         varchar(100),
 
-    es_jefe                boolean default false not null,
-    voluntario                  boolean default false  not null,
+    es_jefe         boolean default false not null,
+    voluntario      boolean default false not null,
 
-    ut_id                   bigint,
-    persona_id              bigint,
+    ut_id           bigint,
+    persona_id      bigint,
 
-    created_at              timestamp(0),
-    updated_at              timestamp(0)
+    created_at      timestamp(0),
+    updated_at      timestamp(0)
 );
 INSERT INTO trabajadores (unidad_id, dni, paterno, materno, nombres, es_jefe, voluntario)
 VALUES (14, '54320001', 'GARCIA', 'RODRIGUEZ', 'JUAN', true, false),
@@ -106,7 +106,6 @@ VALUES (14, '54320001', 'GARCIA', 'RODRIGUEZ', 'JUAN', true, false),
        (19, '54320021', 'PINEDO', 'PAREDES', 'EDWIN', false, true),
        (19, '54320022', 'MAYNAS', 'CHOLITA', 'LUCIANO', false, true),
        (19, '54320023', 'TUESTA', 'RUIZ', 'FERNANDO', false, true);
-
 
 
 
@@ -161,23 +160,24 @@ create table elementos
 -- Mide qué tan rápido debe resolverse el problema.
 create table urgencias
 (
-    id                bigserial
+    id          bigserial
         constraint urgencias_pk
             primary key,
 
-    nombre            varchar(50)           not null,
-    label             varchar(50)           not null,
-    descripcion       text,
-    valor             integer               not null,
-    orden             integer               not null,
-    activo            boolean default true  not null,
-    created_at        timestamp(0),
-    updated_at        timestamp(0)
+    nombre      varchar(50)          not null,
+    label       varchar(50)          not null,
+    descripcion text,
+    valor       integer              not null,
+    orden       integer              not null,
+    activo      boolean default true not null,
+    created_at  timestamp(0),
+    updated_at  timestamp(0)
 );
 INSERT INTO urgencias (id, nombre, label, valor, orden, accesibleUsuarios)
-VALUES (1, 'BAJA', 'Baja', 1, 1, true),  -- SOLICITUD
+VALUES (1, 'BAJA', 'Baja', 1, 1, true),   -- SOLICITUD
        (2, 'MEDIA', 'Media', 2, 2, true), -- INCIDENTE-1
-       (3, 'ALTA', 'Alta', 3, 3, false);  -- INCIDENTE-2
+       (3, 'ALTA', 'Alta', 3, 3, false);
+-- INCIDENTE-2
 
 -- Alta	    El trabajo está completamente detenido
 -- Media	El trabajo continúa pero con dificultad
@@ -204,9 +204,10 @@ create table impactos
 
 
 INSERT INTO impactos (id, nombre, label, valor, orden)
-VALUES (1, 'BAJO', 'Bajo', 1, 1), -- TRABAJADOR-SOLICITUD, TRABAJADOR-INCIDENTE-1
+VALUES (1, 'BAJO', 'Bajo', 1, 1),   -- TRABAJADOR-SOLICITUD, TRABAJADOR-INCIDENTE-1
        (2, 'MEDIO', 'Medio', 2, 2), -- TRABAJADOR-INCIDENTE-2, JEFE-SOLICITUD
-       (3, 'CRITICO', 'Crítico', 3, 3); -- JEFE-INCIDENTE-1-2
+       (3, 'CRITICO', 'Crítico', 3, 3);
+-- JEFE-INCIDENTE-1-2
 
 -- Alto	    Toda la municipalidad o sistema crítico caído
 -- Medio	Un área completa no puede trabajar
@@ -217,7 +218,7 @@ VALUES (1, 'BAJO', 'Bajo', 1, 1), -- TRABAJADOR-SOLICITUD, TRABAJADOR-INCIDENTE-
 
 TIPO
 SOLICITUD - U1
-    - TRABAJADOR I1 -> BAJA P1    
+    - TRABAJADOR I1 -> BAJA P1
     - JEFE I2-> MEDIA P2
 
 INCIDENTE - NO MONITOREADO - U2
@@ -228,7 +229,6 @@ INCIDENTE - MONITOREADO - U3
     - TRABAJADOR I2-> ALTA P3
     - JEFE I3 -> ALTA P3
 */
-
 
 
 
@@ -250,23 +250,23 @@ create table prioridades
     updated_at  timestamp(0)
 );
 INSERT INTO prioridades (id, nombre, label, valor, orden, calculo)
-VALUES (1, 'BAJA', 'Baja', 1, 1, '1x1|2x1|1x2'), -- 1x1|  
-       (2, 'MEDIA', 'Media', 2, 2, '1x3|2x2|3x1'),  -- 1x2|2x2|  
+VALUES (1, 'BAJA', 'Baja', 1, 1, '1x1|2x1|1x2'),   -- 1x1|
+       (2, 'MEDIA', 'Media', 2, 2, '1x3|2x2|3x1'), -- 1x2|2x2|
        (3, 'CRITICA', 'Crítica', 3, 3, '2x3|3x2|3x3'); -- 2x3|3x2|3x3
 
 create table tipos
 (
-    id                bigserial
+    id                      bigserial
         constraint tipos_pk
             primary key,
 
-    nombre            varchar(100)          not null,
-    label             varchar(100)          not null,
-    descripcion       text,
-    activo            boolean default true  not null,
+    nombre                  varchar(100)          not null,
+    label                   varchar(100)          not null,
+    descripcion             text,
+    activo                  boolean default true  not null,
     accesible_mesa_servicio boolean default false not null,
-    created_at        timestamp(0),
-    updated_at        timestamp(0)
+    created_at              timestamp(0),
+    updated_at              timestamp(0)
 );
 
 INSERT INTO tipos (id, nombre, label, accesible_mesa_servicio)
@@ -275,7 +275,6 @@ VALUES (1, 'SOLICITUD', 'Solicitud', true),
        (3, 'CAMBIO', 'Cambio', false),
        (4, 'PROBLEMA', 'Problema', false),
        (5, 'EVENTO', 'Evento', false);
-
 
 
 
@@ -302,25 +301,24 @@ VALUES (1, 'INFRAESTRUCTURA', 'Infraestructura'),
 
 
 
-
 create table servicios
 (
-    id           bigserial
+    id          bigserial
         constraint servicios_pk
             primary key,
-    tipo_id      bigint
+    tipo_id     bigint
         constraint servicios_tipos_id_fk
             references tipos,
-            /*
-    categoria_id bigint
-        constraint servicios_categorias_id_fk
-            references categorias,
-            */
-    nombre       text                 not null,
-    descripcion  text,
-    activo       boolean default true not null,
-    created_at   timestamp(0),
-    updated_at   timestamp(0)
+    /*
+categoria_id bigint
+constraint servicios_categorias_id_fk
+    references categorias,
+    */
+    nombre      text                 not null,
+    descripcion text,
+    activo      boolean default true not null,
+    created_at  timestamp(0),
+    updated_at  timestamp(0)
 );
 
 INSERT INTO servicios (tipo_id, categoria_id, nombre)
@@ -369,9 +367,8 @@ VALUES (1, 1, 'Elaboración Especificaciones Técnicas para adquisición de equi
        (2, 4, 'Usuario sin acceso a Directorio Activo'),
        (2, 4, 'Usuario sin acceso a Aplicaciones'),
 
-        -- ///// CAMBIOS
+       -- ///// CAMBIOS
        (3, 4, 'Modificación de funcionalidades en Aplicaciones')
-
 ;
 
 
@@ -379,7 +376,7 @@ VALUES (1, 1, 'Elaboración Especificaciones Técnicas para adquisición de equi
 -- servicios - solicitudes ---- solicitudes x profesional
 -- problemas - incidentes - categoria
 
-    Computadora
+Computadora
 Internet
 Impresora
 Sistema institucional
@@ -452,7 +449,7 @@ VALUES (1, 'NUEVO', 'Nuevo', 1, 1, true, false, false, true),
        (4, 'PROGRAMADO', 'Programado', 4, 2, false, false, false, false),
        (5, 'ATENDIENDO', 'Atendiendo', 5, 3, false, false, false, false),
        (6, 'INFO_SOLICITADA', 'Información solicitada', 6, 3, false, false, false, true),
-       (7, 'RESUELTO', 'Resuelto', 7, 4, false, false, true, true),
+       (7, 'ATENDIDO', 'Atendido', 7, 4, false, false, true, true),
        (8, 'CERRADO', 'Cerrado', 8, 5, false, true, true, false);
 
 -- NUEVO                EN_ESPERA
@@ -494,51 +491,70 @@ create table acciones
 -- NULL                 -> NUEVO                  = CREAR                               -- usuario
 -- NULL                 -> NUEVO                  = REGISTRAR                           -- mesa_servicio
 
-INSERT INTO acciones ("faseEntrada", "faseSalida", nombre, label, "labelPasado",
-                      "accionSolicitante", "accionBeneficiario", "accionMesaServicio", "accionProfesional")
+--INSERT INTO acciones ("faseEntrada", "faseSalida", nombre, label, "labelPasado",
+--                      "accionSolicitante", "accionBeneficiario", "accionMesaServicio", "accionProfesional")
+
 VALUES (1, 2, 'CATEGORIZAR', 'Categorizar', 'Categorizado', false, false, true, false),
        -- NUEVO-1                -> CATEGORIZADO-2           = CATEGORIZAR                         -- mesa_servicio
+
        (2, 3, 'ASIGNAR', 'Asignar', 'Asignado', false, false, true, false),
        -- CATEGORIZADO-2         -> ASIGNADO-3               = ASIGNAR                             -- mesa_servicio
+
        (3, 5, 'ATENDER', 'Atender', 'Atendiendo', false, false, false, true),
        -- ASIGNADO-3             -> ATENDIENDO-5             = ATENDER                             -- profesional
+
        (3, 4, 'PROGRAMAR', 'Programar atención', 'Atención Programada', false, false, false, true),
        -- ASIGNADO-3             -> PLANIFICADO-4            = PLANIFICAR                          -- profesional
+
        (4, 5, 'ATENDER', 'Atender', 'Atendiendo', false, false, false, true),
        -- PLANIFICADO-4          -> ATENDIENDO-5             = ATENDER                             -- profesional
+
        (5, 6, 'SOLICITAR_INFO', 'Solicitar información', 'Información solicitada', false, false, false, true),
        -- ATENDIENDO-5           -> INFO_SOLICITADA-6         = SOLICITAR_INFO                      -- profesional
+
        (5, 5, 'REGISTRAR_VISITA_INFRUCTUOSA', 'Registrar visita infructuosa', 'Visita infructuosa', false, false,
         false, true),
        -- ATENDIENDO-5           -> ATENDIENDO-5             = REGISTRAR_VISITA_INFRUCTUOSA        -- profesional
+
        (5, 4, 'PROGRAMAR', 'Programar atención', 'Atención programada', false, false, false, true),
        -- ATENDIENDO-5           -> PLANIFICADO-4            = PLANIFICAR                          -- profesional
+
        (5, 7, 'REGISTRAR_RESOLUCION', 'Registrar atención realizar', 'Resuelto', false, false, false, true),
        -- ATENDIENDO-5           -> RESUELTO-7               = RESOLVER                            -- profesional
+
        (6, 5, 'ENVIAR_INFO', 'Enviar información', 'Información Agregada', true, true, false, false),
        -- INFO_SOLICITADA-6       -> ATENDIENDO-5             = ENVIAR_INFO                         -- usuario
+
        (7, 8, 'CONFIRMAR', 'Confirmar atención', 'Atención confirmada', true, true, false, false),
        -- RESUELTO-7             -> CERRADO-8                = CONFIRMAR                           -- usuario
 
        (3, 3, 'REASIGNAR', 'Reasignar', 'Reasignado', false, false, true, false),
        -- ASIGNADO-3             -> ASIGNADO-3               = REASIGNAR                          -- mesa_servicio
+
        (4, 4, 'REASIGNAR', 'Reasignar', 'Reasignado', false, false, true, false),
        -- PLANIFICADO-4          -> PLANIFICADO-4            = REASIGNAR                          -- mesa_servicio
+
        (5, 5, 'REASIGNAR', 'Reasignar', 'Reasignado', false, false, true, false),
        -- ATENDIENDO-5           -> ATENDIENDO-5             = REASIGNAR                          -- mesa_servicio
+
        (6, 6, 'REASIGNAR', 'Reasignar', 'Reasignado', false, false, true, false),
        -- INFO_SOLICITADA-6       -> INFO_SOLICITADA-6         = REASIGNAR                          -- mesa_servicio
 
        (1, 7, 'CANCELAR', 'Cancelar', 'Cancelado', true, true, true, false),
        -- NUEVO-1                -> RESUELTO-7               = CANCELAR                            -- usuario, mesa_servicio
+
        (2, 7, 'CANCELAR', 'Cancelar', 'Cancelado', true, true, true, false),
        -- CATEGORIZADO-2         -> RESUELTO-7               = CANCELAR                            -- usuario, mesa_servicio, profesional
+
        (5, 7, 'CANCELAR', 'Cancelar', 'Cancelado', true, true, true, true),
        -- ASIGNADO-3             -> RESUELTO-7               = CANCELAR                            -- usuario, mesa_servicio, profesional
+
        (5, 7, 'CANCELAR', 'Cancelar', 'Cancelado', true, true, true, true),
        -- PLANIFICADO-4          -> RESUELTO-7               = CANCELAR                            -- usuario, mesa_servicio, profesional
+
        (5, 7, 'CANCELAR', 'Cancelar', 'Cancelado', true, true, true, true),
        -- ATENDIENDO-5           -> RESUELTO-7               = CANCELAR                            -- usuario, mesa_servicio, profesional
+
        (5, 7, 'CANCELAR', 'Cancelar', 'Cancelado', true, true, true, true);
 -- INFO_SOLICTADA-6       -> RESUELTO-7               = CANCELAR                            -- usuario, mesa_servicio, profesional
 
@@ -607,7 +623,7 @@ create table tickets
         constraint tickets_fuentes_id_fk
             references fuentes,
 
-    "userSolicitante"     bigint                not null --- QUIEN SOLICITA
+    "userSolicitante"        bigint                not null --- QUIEN SOLICITA
         constraint tickets_users_id_fk
             references users,
 
@@ -615,7 +631,7 @@ create table tickets
         constraint tickets_trabajadores_id_fk
             references trabajadores,
 
-    "userBeneficiario"    bigint                not null -- QUIEN SE BENEFICIA
+    "userBeneficiario"       bigint                not null -- QUIEN SE BENEFICIA
         constraint tickets_users_id_fk_2
             references users,
 
@@ -670,22 +686,22 @@ create table tickets
         constraint tickets_equipos_id_fk
             references equipos,
 
-    userAsignado           bigint
+    userAsignado             bigint
         constraint tickets_users_id_fk_3
             references users,
 
-    profesionalAsignado           bigint
+    profesionalAsignado      bigint
         constraint tickets_profesionales_id_fk
             references profesiones,
 
 
-    trabajadorAsignado           bigint
+    trabajadorAsignado       bigint
         constraint tickets_trabajadores_id_fk_3
             references trabajadores,
 
     --- RESULTADOS
-    abierto                 boolean default true not null,
-    "paraCierre"                 boolean default false not null,
+    abierto                  boolean default true  not null,
+    "paraCierre"             boolean default false not null,
 
     resultado_id             bigint
         constraint tickets_resultados_id_fk
