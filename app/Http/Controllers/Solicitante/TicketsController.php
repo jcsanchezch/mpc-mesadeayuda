@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Solicitante;
 
 use App\Http\Controllers\Controller;
 use App\Models\Archivo;
-use App\Models\Canal;
+use App\Models\CanalRegistro;
 use App\Models\Categoria;
 use App\Models\Dependencia;
 use App\Models\Estado;
 use App\Models\Local;
 use App\Models\Servicio;
+use App\Models\Solicitud;
 use App\Models\Ticket;
 use App\Models\TicketArchivo;
 use App\Models\TicketHistorial;
@@ -111,14 +112,16 @@ class TicketsController extends Controller
     public function crearVista()
     {
         $categorias = Categoria::with(['servicios' => function ($q) {
-            $q->whereHas('tipo', fn($t) => $t->where('disponible_al_solicitante', true))
-              ->where('activo', true)
-              ->with(['formatos.archivo'])
+            $q->where('activo', true)
+              ->with([
+                  'formatos.archivo',
+                  'solicitudes' => fn($sq) => $sq->where('activo', true)->orderBy('nombre'),
+              ])
               ->orderBy('nombre');
         }])
         ->whereHas('servicios', function ($q) {
-            $q->whereHas('tipo', fn($t) => $t->where('disponible_al_solicitante', true))
-              ->where('activo', true);
+            $q->where('activo', true)
+              ->whereHas('solicitudes', fn($sq) => $sq->where('activo', true));
         })
         ->where('activo', true)
         ->orderBy('nombre')
@@ -147,19 +150,25 @@ class TicketsController extends Controller
     {
         $validated = $request->validate([
             'modo'           => ['required', 'in:1,2'],
-            'servicio_id'    => ['nullable', 'integer', 'exists:servicios,id'],
+            'solicitud_id'   => ['nullable', 'integer', 'exists:solicitudes,id'],
             'dependencia_id' => ['nullable', 'integer', 'exists:dependencias,id'],
             'local_id'       => ['nullable', 'integer', 'exists:locales,id'],
-            'asunto'         => ['required', 'string', 'max:500'],
+            'asunto'         => ['required_if:modo,1', 'nullable', 'string', 'max:500'],
             'celular'        => ['nullable', 'string', 'max:15'],
             'descripcion'    => ['nullable', 'string'],
             'archivos'       => ['nullable', 'array', 'max:5'],
             'archivos.*'     => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'],
-        ]);
+        ], [], ['solicitud_id' => 'solicitud']);
 
+        $solicitud = null;
         if ($validated['modo'] === '2') {
-            $request->validate(['servicio_id' => ['required']]);
-            $validated['asunto'] = Servicio::findOrFail($validated['servicio_id'])->nombre;
+            $request->validate(
+                ['solicitud_id' => ['required', 'integer', 'exists:solicitudes,id']],
+                [],
+                ['solicitud_id' => 'solicitud']
+            );
+            $solicitud = Solicitud::with('servicio')->findOrFail($validated['solicitud_id']);
+            $validated['asunto'] = $solicitud->nombre;
         }
 
         $year  = now()->year;
@@ -171,15 +180,18 @@ class TicketsController extends Controller
         $codigo = sprintf('%d-%05d', $year, $seq);
 
         $estadoInicio = Estado::where('es_inicio', true)->firstOrFail();
-        $canalMesa    = Canal::where('codigo', 'MESA_DE_SERVICIO')->firstOrFail();
+        $canalMesa    = CanalRegistro::where('codigo', 'APLICACION')->firstOrFail();
+
+        $trabajador = Auth::user()->trabajador;
 
         $ticket = Ticket::create([
             'codigo'           => $codigo,
-            'solicitante_id'   => Auth::id(),
-            'dependencia_id'   => $validated['dependencia_id'] ?? null,
-            'local_id'         => $validated['local_id'] ?? null,
+            'solicitante_id'   => $trabajador?->id ?? Auth::id(),
+            'dependencia_id'   => $validated['dependencia_id'] ?? $trabajador?->dependencia_id,
+            'local_id'         => $validated['local_id'] ?? $trabajador?->local_id,
             'canal_id'         => $canalMesa->id,
-            'servicio_id'      => $validated['servicio_id'] ?? null,
+            'solicitud_id'     => $solicitud?->id,
+            'servicio_id'      => $solicitud?->servicio_id,
             'servicio_directo' => $validated['modo'] === '2',
             'estado'           => $estadoInicio->codigo,
             'asunto'           => $validated['asunto'],
@@ -238,6 +250,71 @@ class TicketsController extends Controller
             $bytes = (int) round($bytes / 1024);
         }
         return "{$bytes} TB";
+    }
+
+    public function verVista(Ticket $ticket)
+    {
+        abort_if($ticket->solicitante_id !== Auth::id(), 403);
+
+        $ticket->load([
+            'servicio.categoria',
+            'dependencia',
+            'local',
+            'prioridad',
+            'solicitante',
+            'historial.estadoNuevo',
+            'historial.estadoAnterior',
+            'historial.user',
+            'archivos.archivo',
+            'archivos.user',
+        ]);
+
+        $estados     = Estado::where('activo', true)->get(['codigo', 'label', 'text_color', 'bg_color']);
+        $prioridades = \App\Models\Prioridad::where('activo', true)->get(['codigo', 'label', 'text_color', 'bg_color']);
+
+        return Inertia::render('Solicitante/Tickets/Ver', [
+            'estados'     => $estados,
+            'prioridades' => $prioridades,
+            'ticket'      => [
+                'id'          => $ticket->id,
+                'codigo'      => $ticket->codigo,
+                'dni'         => $ticket->solicitante?->dni,
+                'solicitante' => trim("{$ticket->solicitante?->paterno} {$ticket->solicitante?->materno} {$ticket->solicitante?->nombres}"),
+                'categoria'   => $ticket->servicio?->categoria?->nombre,
+                'servicio'    => $ticket->servicio?->nombre,
+                'asunto'      => $ticket->asunto,
+                'estado'      => $ticket->estado,
+                'prioridad'   => $ticket->prioridad?->codigo,
+                'cerrado'     => in_array($ticket->estado, ['CANCELADO', 'CERRADO']),
+                'fecha'       => $ticket->created_at?->format('d/m/Y H:i'),
+                'descripcion' => $ticket->descripcion,
+                'resolucion'  => $ticket->resolucion,
+                'dependencia' => $ticket->dependencia?->nombre,
+                'local'       => $ticket->local?->nombre,
+                'celular'     => $ticket->celular,
+                'archivos'    => $ticket->archivos->map(fn($a) => [
+                    'id'      => $a->id,
+                    'nombre'  => $a->archivo?->filename_original,
+                    'peso'    => $a->archivo?->filesize_human,
+                    'mime'    => $a->archivo?->mime_type,
+                    'ruta'    => $a->archivo?->ruta
+                        ? Storage::disk('minio')->temporaryUrl($a->archivo->ruta, now()->addHour())
+                        : null,
+                    'tipo'    => $a->tipo,
+                    'firmado' => $a->firmado_digitalmente,
+                    'usuario' => trim("{$a->user?->nombres} {$a->user?->paterno}"),
+                ]),
+                'historial'   => $ticket->historial->sortBy('created_at')->values()->map(fn($h) => [
+                    'id'              => $h->id,
+                    'estado_anterior' => $h->estadoAnterior?->codigo,
+                    'estado_nuevo'    => $h->estadoNuevo?->codigo,
+                    'usuario'         => trim("{$h->user?->nombres} {$h->user?->paterno}"),
+                    'comentario'      => $h->comentario,
+                    'es_conformidad'  => $h->es_conformidad,
+                    'fecha'           => $h->created_at?->format('d/m/Y H:i'),
+                ]),
+            ],
+        ]);
     }
 
     public function conformidad(Request $request, Ticket $ticket)

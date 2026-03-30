@@ -56,12 +56,14 @@ return new class extends Migration
             $table->timestamps(0);
         });
 
-        Schema::create('tipos', function (Blueprint $table) {
+        Schema::create('slas', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo', 300);
-            $table->string('label', 300);
+            $table->string('codigo', 150);
             $table->text('descripcion')->nullable();
-            $table->boolean('disponible_al_solicitante')->default(true);
+            $table->unsignedSmallInteger('horas_respuesta')
+                ->comment('Tiempo máximo para primera respuesta en horas hábiles');
+            $table->unsignedSmallInteger('horas_resolucion')
+                ->comment('Tiempo máximo para resolución en horas hábiles');
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
@@ -74,27 +76,53 @@ return new class extends Migration
             $table->timestamps(0);
         });
 
+        Schema::create('servicios', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 300);
+            $table->text('descripcion')->nullable();
+            $table->foreignId('categoria_id')->constrained('categorias');
+            $table->foreignId('sla_id')->constrained('slas');
+            $table->boolean('activo')->default(true);
+            $table->timestamps(0);
+        });
+
+        Schema::create('solicitudes', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 300);
+            $table->text('descripcion')->nullable();
+            $table->foreignId('servicio_id')->constrained('servicios');
+            $table->boolean('activo')->default(true);
+            $table->timestamps(0);
+        });
+
+        // SOLICITUD, INCIDENTE, PROBLEMA, CAMBIO,
+        Schema::create('tipos', function (Blueprint $table) {
+            $table->id();
+            $table->string('codigo', 300);
+            $table->string('label', 300);
+            $table->text('descripcion')->nullable();
+            $table->boolean('disponible_al_solicitante')->default(true);
+            $table->boolean('activo')->default(true);
+            $table->timestamps(0);
+        });
 
         Schema::create('niveles', function (Blueprint $table) {
             $table->id();
             $table->unsignedTinyInteger('nivel')->unique()
-                  ->comment('Tier ITIL 4 — 0: Autoservicio, 1: Mesa de Servicios, 2: Soporte Técnico, 3: Soporte Experto, 4: Proveedor Externo');
+                ->comment('Tier ITIL 4 — 0: Autoservicio, 1: Mesa de Servicios, 2: Soporte Técnico, 3: Soporte Experto, 4: Proveedor Externo');
             $table->string('codigo', 10)->unique()
-                  ->comment('Código corto: N0, N1, N2, N3, N4');
+                ->comment('Código corto: N0, N1, N2, N3, N4');
             $table->string('label', 150);
             $table->text('descripcion')->nullable();
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
 
-        Schema::create('servicios', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre', 300);
-            $table->text('descripcion')->nullable();
-            $table->foreignId('categoria_id')->constrained('categorias');
-            $table->foreignId('tipo_id')->constrained('tipos');
-            $table->boolean('activo')->default(true);
-            $table->timestamps(0);
+
+        // tipo_id en servicios se añade aquí porque tipos se crea después de servicios
+        Schema::table('servicios', function (Blueprint $table) {
+            $table->foreignId('tipo_id')->nullable()->after('sla_id')
+                ->constrained('tipos')->nullOnDelete();
         });
 
         Schema::create('especialistas_servicios', function (Blueprint $table) {
@@ -136,11 +164,21 @@ return new class extends Migration
             $table->timestamps(0);
         });
 
-        Schema::create('canales', function (Blueprint $table) {
+
+
+        // tipo_id y prioridad_id en slas se añaden aquí porque ambas tablas se crean después de slas
+        Schema::table('slas', function (Blueprint $table) {
+            $table->foreignId('tipo_id')->nullable()->after('codigo')
+                ->constrained('tipos')->nullOnDelete();
+            $table->foreignId('prioridad_id')->nullable()->after('tipo_id')
+                ->constrained('prioridades')->nullOnDelete();
+            $table->unique(['tipo_id', 'prioridad_id']);
+        });
+
+        Schema::create('canales_registro', function (Blueprint $table) {
             $table->id();
             $table->string('codigo', 50)->unique();
             $table->string('label', 100);
-            $table->boolean('es_aplicacion')->default(false);
             $table->boolean('activo')->default(true);
             $table->timestamps(0);
         });
@@ -162,13 +200,17 @@ return new class extends Migration
             $table->foreignId('solicitante_id')->constrained('trabajadores');
             $table->foreignId('dependencia_id')->constrained('dependencias');
             $table->foreignId('local_id')->constrained('locales');
-            $table->foreignId('canal_id')->nullable()->constrained('canales')->nullOnDelete();
+            $table->foreignId('canal_id')->nullable()->constrained('canales_registro')->nullOnDelete();
 
             $table->foreignId('prioridad_id')->nullable()->constrained('prioridades')->nullOnDelete();
             $table->foreignId('servicio_id')->nullable()->constrained('servicios')->nullOnDelete();
+            $table->foreignId('solicitud_id')->nullable()->constrained('solicitudes')->nullOnDelete();
+
+
             $table->foreignId('especialista_id')->nullable()->constrained('especialistas')->nullOnDelete();
             $table->boolean('servicio_directo')->default(false)->comment('El asunto fue tomado del nombre del servicio, no escrito manualmente');
 
+            $table->foreignId('sla_id')->nullable()->constrained('slas')->nullOnDelete();
             $table->foreignId('dificultad_id')->nullable()->constrained('dificultades')->nullOnDelete();
 
             $table->string('estado', 30)->default('EN_ESPERA');
@@ -255,14 +297,26 @@ return new class extends Migration
         Schema::dropIfExists('archivos');
         Schema::dropIfExists('tickets_historial');
         Schema::dropIfExists('tickets');
-        Schema::dropIfExists('canales');
+        Schema::dropIfExists('canales_registro');
         Schema::dropIfExists('dificultades');
+        Schema::table('slas', function (Blueprint $table) {
+            $table->dropUnique(['tipo_id', 'prioridad_id']);
+            $table->dropForeign(['tipo_id']);
+            $table->dropForeign(['prioridad_id']);
+            $table->dropColumn(['tipo_id', 'prioridad_id']);
+        });
+        Schema::dropIfExists('slas');
         Schema::dropIfExists('prioridades');
         Schema::dropIfExists('estados');
         Schema::dropIfExists('especialistas_servicios');
-        Schema::dropIfExists('servicios');
         Schema::dropIfExists('niveles');
         Schema::dropIfExists('tipos');
+        Schema::dropIfExists('solicitudes');
+        Schema::table('servicios', function (Blueprint $table) {
+            $table->dropForeign(['tipo_id']);
+            $table->dropColumn('tipo_id');
+        });
+        Schema::dropIfExists('servicios');
         Schema::dropIfExists('categorias');
         Schema::dropIfExists('especialistas');
         Schema::table('users', function (Blueprint $table) {

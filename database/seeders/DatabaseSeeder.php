@@ -12,8 +12,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             InfraestructuraSeeder::class,
             TrabajadoresSeeder::class,
-            ServiciosSeeder::class,
             ParametrosSeeder::class,
+            ServiciosSeeder::class,
         ]);
     }
 }

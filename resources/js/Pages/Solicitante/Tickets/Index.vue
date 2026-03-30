@@ -11,15 +11,6 @@ const props = defineProps({
     cerrados: { type: Array,  default: () => [] },
 });
 
-// ── Modal detalle (incluye historial) ────────────────────────
-const modalDetalle  = ref(false);
-const ticketDetalle = ref(null);
-
-const verDetalle = (ticket) => {
-    ticketDetalle.value = ticket;
-    modalDetalle.value  = true;
-};
-
 // ── Modal conformidad ────────────────────────────────────────
 const modalConformidad  = ref(false);
 const ticketConformidad = ref(null);
@@ -120,7 +111,7 @@ const estadoLabel = (estado) => ({
                                 <div class="flex items-center justify-center gap-2">
                                     <button type="button"
                                         class="bg-blue-500 border-b-2 border-b-blue-600 text-white py-1.5 px-3 rounded-[4px] text-xs cursor-pointer hover:bg-blue-600 transition flex items-center gap-1.5"
-                                        @click="verDetalle(ticket)">
+                                        @click="router.visit(route('solicitante.tickets.ver', ticket.id))">
                                         <i class="fa-solid fa-eye"></i> Detalle
                                     </button>
                                     <button v-if="ticket.estado === 'ATENDIDO'" type="button"
@@ -167,7 +158,7 @@ const estadoLabel = (estado) => ({
                             <td class="px-3 py-3 border-l border-l-gray-200 text-center">
                                 <button type="button"
                                     class="bg-blue-300 border-b-2 border-b-blue-400 text-white py-1.5 px-3 rounded-[4px] text-xs cursor-pointer hover:bg-blue-400 transition flex items-center gap-1.5 mx-auto"
-                                    @click="verDetalle(ticket)">
+                                    @click="router.visit(route('solicitante.tickets.ver', ticket.id))">
                                     <i class="fa-solid fa-eye"></i> Detalle
                                 </button>
                             </td>
@@ -175,146 +166,6 @@ const estadoLabel = (estado) => ({
                     </template>
                 </template>
             </TableBase>
-
-        <!-- ── Modal: Detalle + Historial ─────────────────────────── -->
-        <Teleport to="body">
-            <div v-if="modalDetalle"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-                @click.self="modalDetalle = false">
-                <div class="bg-white rounded-[4px] shadow-xl w-full max-w-3xl flex flex-col max-h-[90vh]">
-
-                    <!-- Header -->
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
-                        <div class="flex items-center gap-3">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-700">Detalle del ticket</p>
-                                <p class="text-xs text-gray-400">{{ ticketDetalle?.codigo }}</p>
-                            </div>
-                            <span :class="['px-2 py-1 rounded-[4px] text-xs font-medium', estadoClase(ticketDetalle?.estado)]">
-                                {{ estadoLabel(ticketDetalle?.estado) }}
-                            </span>
-                        </div>
-                        <button type="button" @click="modalDetalle = false"
-                            class="text-gray-400 hover:text-gray-600 transition">
-                            <i class="fa-solid fa-xmark text-lg"></i>
-                        </button>
-                    </div>
-
-                    <!-- Body scrollable -->
-                    <div class="overflow-y-auto px-6 py-5 space-y-6">
-
-                        <!-- Datos del ticket -->
-                        <div class="space-y-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Datos del Ticket</p>
-
-                            <div class="grid grid-cols-3 gap-x-6 gap-y-3 text-xs">
-                                <div>
-                                    <p class="text-gray-400 mb-0.5">Código</p>
-                                    <p class="font-medium text-gray-700">{{ ticketDetalle?.codigo }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-400 mb-0.5">Fecha de creación</p>
-                                    <p class="text-gray-700">{{ ticketDetalle?.fecha }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-400 mb-0.5">Estado</p>
-                                    <span :class="['px-2 py-1 rounded-[4px] text-xs font-medium', estadoClase(ticketDetalle?.estado)]">
-                                        {{ estadoLabel(ticketDetalle?.estado) }}
-                                    </span>
-                                </div>
-                                <div>
-                                    <p class="text-gray-400 mb-0.5">Categoría</p>
-                                    <p class="text-gray-700">{{ ticketDetalle?.categoria ?? '—' }}</p>
-                                </div>
-                                <div class="col-span-2">
-                                    <p class="text-gray-400 mb-0.5">Servicio</p>
-                                    <p class="text-gray-700">{{ ticketDetalle?.servicio ?? '—' }}</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <p class="text-xs text-gray-400 mb-1">Asunto</p>
-                                <p class="text-sm font-medium text-gray-700">{{ ticketDetalle?.asunto }}</p>
-                            </div>
-
-                            <div v-if="ticketDetalle?.descripcion">
-                                <p class="text-xs text-gray-400 mb-1">Descripción</p>
-                                <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed bg-gray-50 border border-gray-100 rounded-[4px] px-3 py-2.5">{{ ticketDetalle?.descripcion }}</p>
-                            </div>
-
-                            <div v-if="ticketDetalle?.resolucion">
-                                <p class="text-xs text-gray-400 mb-1">Resolución</p>
-                                <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed bg-emerald-50 border border-emerald-100 rounded-[4px] px-3 py-2.5">{{ ticketDetalle?.resolucion }}</p>
-                            </div>
-
-                            <!-- Archivos -->
-                            <div>
-                                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                    <i class="fa-solid fa-paperclip mr-1"></i>Archivos adjuntos
-                                </p>
-                                <p v-if="!ticketDetalle?.archivos?.length" class="text-xs text-gray-400 italic">Sin archivos adjuntos</p>
-                                <div v-else class="space-y-1.5">
-                                    <a v-for="arch in ticketDetalle.archivos" :key="arch.id"
-                                        :href="arch.ruta" target="_blank"
-                                        class="flex items-center gap-3 p-2.5 border border-gray-200 rounded-[4px] hover:border-blue-300 hover:bg-blue-50/40 transition group">
-                                        <i class="fa-solid fa-file text-gray-300 group-hover:text-blue-400 text-lg w-5 text-center"></i>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-medium text-gray-700 truncate">{{ arch.nombre }}</p>
-                                            <p class="text-xs text-gray-400">
-                                                {{ arch.peso }}
-                                                <span v-if="arch.tipo !== 'adjunto'" class="ml-2 px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">{{ arch.tipo }}</span>
-                                                <span v-if="arch.firmado" class="ml-2 px-1.5 py-0.5 bg-emerald-100 text-emerald-600 rounded">firmado</span>
-                                            </p>
-                                        </div>
-                                        <i class="fa-solid fa-download text-gray-300 group-hover:text-blue-400 text-xs"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="border-t border-gray-200"></div>
-
-                        <!-- Historial -->
-                        <div class="space-y-3">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                <i class="fa-solid fa-clock-rotate-left mr-1"></i>Historial
-                            </p>
-                            <div v-if="!ticketDetalle?.historial?.length"
-                                class="text-center text-gray-400 py-6 text-sm">
-                                Sin movimientos registrados
-                            </div>
-                            <div v-else class="relative">
-                                <div class="absolute left-3.5 top-2 bottom-2 w-px bg-gray-200"></div>
-                                <div v-for="h in ticketDetalle.historial" :key="h.id" class="relative flex gap-4 pb-4">
-                                    <div :class="['relative z-10 flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs',
-                                        h.es_conformidad ? 'border-emerald-400 bg-emerald-50 text-emerald-500' : 'border-blue-300 bg-blue-50 text-blue-400']">
-                                        <i :class="h.es_conformidad ? 'fa-solid fa-check' : 'fa-solid fa-arrow-right'"></i>
-                                    </div>
-                                    <div class="flex-1 pt-0.5">
-                                        <div class="flex items-center gap-2 flex-wrap">
-                                            <span v-if="h.estado_anterior" class="text-xs text-gray-400">
-                                                {{ estadoLabel(h.estado_anterior) }}
-                                            </span>
-                                            <i v-if="h.estado_anterior" class="fa-solid fa-arrow-right text-gray-300 text-xs"></i>
-                                            <span :class="['text-xs font-semibold px-2 py-0.5 rounded-[4px]', estadoClase(h.estado_nuevo)]">
-                                                {{ estadoLabel(h.estado_nuevo) }}
-                                            </span>
-                                            <span v-if="h.es_conformidad"
-                                                class="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-[4px] font-medium">
-                                                Conformidad
-                                            </span>
-                                        </div>
-                                        <p v-if="h.comentario" class="mt-1 text-xs text-gray-600">{{ h.comentario }}</p>
-                                        <p class="mt-0.5 text-xs text-gray-400">{{ h.usuario }} · {{ h.fecha }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </Teleport>
 
         <!-- ── Modal: Conformidad ──────────────────────────────────── -->
         <Teleport to="body">

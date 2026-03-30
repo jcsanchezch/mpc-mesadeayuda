@@ -8,7 +8,8 @@ class Servicio extends Model
 {
     protected $fillable = ['nombre', 'descripcion', 'categoria_id', 'tipo_id', 'activo'];
 
-    public function categoria() { return $this->belongsTo(Categoria::class); }
-    public function tipo()      { return $this->belongsTo(Tipo::class); }
-    public function formatos()  { return $this->hasMany(Formato::class)->where('activo', true); }
+    public function categoria()  { return $this->belongsTo(Categoria::class); }
+    public function tipo()       { return $this->belongsTo(Tipo::class); }
+    public function formatos()   { return $this->hasMany(Formato::class)->where('activo', true); }
+    public function solicitudes(){ return $this->hasMany(Solicitud::class)->where('activo', true); }
 }

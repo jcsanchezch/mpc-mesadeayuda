@@ -28,6 +28,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         Route::get('/',                              [TicketsController::class, 'index'])->name('index');
         Route::get('/crear',                         [TicketsController::class, 'crearVista'])->name('tickets.crear');
         Route::post('/crear',                        [TicketsController::class, 'crearTicket'])->name('crear');
+        Route::get('/tickets/{ticket}',              [TicketsController::class, 'verVista'])->name('tickets.ver');
         Route::post('/tickets/{ticket}/conformidad', [TicketsController::class, 'conformidad'])->name('tickets.conformidad');
     });
 

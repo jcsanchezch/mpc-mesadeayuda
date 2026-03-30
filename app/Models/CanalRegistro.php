@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Canal extends Model
+class CanalRegistro extends Model
 {
-    protected $table = 'canales';
+    protected $table = 'canales_registro';
 
-    protected $fillable = ['codigo', 'label', 'es_aplicacion', 'activo'];
+    protected $fillable = ['codigo', 'label', 'activo'];
 
     public function tickets() { return $this->hasMany(Ticket::class); }
 }

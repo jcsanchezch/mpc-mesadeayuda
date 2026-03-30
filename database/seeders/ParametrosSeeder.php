@@ -149,18 +149,20 @@ Resolved → Reopened → Assigned
         }
 
         // ── Canales ───────────────────────────────────────────────────────────
-        $canales = [
-            ['codigo' =>'APLICACION', 'label' => 'Aplicación Mesa de Ayuda', 'activo' => true, 'es_aplicacion' => true],
-            ['codigo' =>'PRESENCIAL_MS', 'label' => 'Presencial en Mesa de Servicio', 'activo' => true],
-            ['codigo' =>'CORREO', 'label' => 'Correo Electrónico', 'activo' => true],
-            ['codigo' =>'SGD', 'label' => 'Sistema de Gestión Documental', 'activo' => true],
-            ['codigo' =>'LLAMADA', 'label' => 'Llamada Telefónica', 'activo' => true],
-            ['codigo' =>'JEFATURA', 'label' => 'Indicación de la Jefatura', 'activo' => true],
-            ['codigo' =>'OTRO', 'label' => 'Otro Canal', 'activo' => true],
+        $canales_registro = [
+            ['codigo' =>'APLICACION', 'label' => 'Aplicación Mesa de Ayuda'],
+            ['codigo' =>'MESA_DE_SERVICIO', 'label' => 'Mesa de Servicio'],
+            ['codigo' =>'LLAMADA', 'label' => 'Llamada Telefónica'],
+            ['codigo' =>'WHATSAPP', 'label' => 'WhatsApp'],
+            ['codigo' =>'CORREO', 'label' => 'Correo Electrónico'],
+            ['codigo' =>'APP_SGD', 'label' => 'Sistema de Gestión Documental'],
+            ['codigo' =>'JEFATURA', 'label' => 'Indicación de la Jefatura'],
+            ['codigo' =>'COORDINADOR', 'label' => 'Indicación de un Coordinador de OTI'],
+            ['codigo' =>'OTRO', 'label' => 'Otro Canal'],
         ];
 
-        foreach ($canales as $c) {
-            DB::table('canales')->updateOrInsert(['codigo' => $c['codigo']], $c);
+        foreach ($canales_registro as $c) {
+            DB::table('canales_registro')->updateOrInsert(['codigo' => $c['codigo']], $c);
         }
 
         // ── Prioridades ───────────────────────────────────────────────────────
@@ -172,6 +174,18 @@ Resolved → Reopened → Assigned
 
         foreach ($prioridades as $p) {
             DB::table('prioridades')->updateOrInsert(['codigo' => $p['codigo']], $p);
+        }
+
+        // ── SLAs ──────────────────────────────────────────────────────────────
+        $slas = [
+            ['codigo' => 'CRITICA', 'descripcion' => 'Interrupción total del servicio. Impacto crítico en la operación.', 'horas_respuesta' => 1,  'horas_resolucion' => 4,  'activo' => true],
+            ['codigo' => 'ALTA',    'descripcion' => 'Degradación severa del servicio. Impacto alto en el usuario.',     'horas_respuesta' => 4,  'horas_resolucion' => 8,  'activo' => true],
+            ['codigo' => 'MEDIA',   'descripcion' => 'Afectación parcial del servicio. Existe solución alternativa.',    'horas_respuesta' => 8,  'horas_resolucion' => 24, 'activo' => true],
+            ['codigo' => 'BAJA',    'descripcion' => 'Solicitud de baja urgencia o mejora sin impacto operativo.',       'horas_respuesta' => 24, 'horas_resolucion' => 72, 'activo' => true],
+        ];
+
+        foreach ($slas as $s) {
+            DB::table('slas')->updateOrInsert(['codigo' => $s['codigo']], $s);
         }
 
         // ── Dificultades ──────────────────────────────────────────────────────

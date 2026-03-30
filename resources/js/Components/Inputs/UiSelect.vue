@@ -34,6 +34,8 @@ const modelValue = defineModel({ default: null })
 const searchText    = ref('')
 const showDropdown  = ref(false)
 
+const getLabel = (opt) => opt[props.labelKey] ?? ''
+
 // Sincroniza el texto cuando el valor cambia externamente
 watch(modelValue, (val) => {
     if (val === null || val === '' || val === undefined) {
@@ -43,8 +45,6 @@ watch(modelValue, (val) => {
     const found = props.options.find(o => o[props.valueKey] == val)
     if (found) searchText.value = getLabel(found)
 }, { immediate: true })
-
-const getLabel = (opt) => opt[props.labelKey] ?? ''
 
 const filtered = computed(() => {
     const q = searchText.value.trim().toLowerCase()
@@ -82,13 +82,19 @@ const hide = () => setTimeout(() => showDropdown.value = false, 150)
                 :placeholder="placeholder"
                 type="text"
                 :class="[
-                    'w-full border rounded-[4px] py-2.5 pl-3 pr-8 text-sm bg-white focus:outline-blue-500 transition-colors',
+                    'w-full border rounded-[4px] py-2.5 pl-3 pr-14 text-sm bg-white focus:outline-blue-500 transition-colors',
                     disabled ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
                              : 'border-gray-300 focus:border-blue-500',
                     error    ? '!border-red-400' : '',
                 ]"
                 autocomplete="off"
             />
+            <button v-if="modelValue !== null && modelValue !== '' && modelValue !== undefined && !disabled"
+                type="button"
+                @mousedown.prevent="modelValue = null; searchText = ''"
+                class="absolute right-7 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-gray-700 transition-colors">
+                <i class="fa-solid fa-xmark text-[9px]"></i>
+            </button>
             <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
 
             <div v-if="showDropdown && !disabled"

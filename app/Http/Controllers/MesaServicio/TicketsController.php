@@ -4,7 +4,7 @@ namespace App\Http\Controllers\MesaServicio;
 
 use App\Http\Controllers\Controller;
 use App\Models\Archivo;
-use App\Models\Canal;
+use App\Models\CanalRegistro;
 use App\Models\Categoria;
 use App\Models\Dificultad;
 use App\Models\Dependencia;
