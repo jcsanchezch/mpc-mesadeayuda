@@ -56,13 +56,17 @@ return new class extends Migration
             $table->timestamps(0);
         });
 
+
+
+        // Servicios
+
         Schema::create('slas', function (Blueprint $table) {
             $table->id();
             $table->string('codigo', 150);
             $table->text('descripcion')->nullable();
-            $table->unsignedSmallInteger('horas_respuesta')
+            $table->unsignedSmallInteger('tiempo_respuesta')
                 ->comment('Tiempo máximo para primera respuesta en horas hábiles');
-            $table->unsignedSmallInteger('horas_resolucion')
+            $table->unsignedSmallInteger('tiempo_resolucion')
                 ->comment('Tiempo máximo para resolución en horas hábiles');
             $table->boolean('activo')->default(true);
             $table->timestamps(0);

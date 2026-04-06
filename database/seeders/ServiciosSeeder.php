@@ -16,10 +16,6 @@ class ServiciosSeeder extends Seeder
         $slaIds = DB::table('slas')->pluck('id', 'codigo');
 
         $catalogo = [
-
-            // ────────────────────────────────────────────────────────────────
-            // 1. ADQUISICIONES
-            // ────────────────────────────────────────────────────────────────
             [
                 'categoria' => [
                     'nombre' => 'Adquisiciones',
@@ -47,35 +43,43 @@ class ServiciosSeeder extends Seeder
             [
                 'categoria' => [
                     'nombre' => 'Estación de Trabajo',
-                    'descripcion' => 'Servicios relacionados con computadoras, impresoras, escaneres y otros dispositivos conectados a computadoras.',
+                    'descripcion' => 'Servicios relacionados con computadoras, impresoras, escaneres y otros dispositivos conectados a computadoras',
                 ],
                 'servicios' => [
                     [
                         'nombre' => 'Gestión de Computadoras',
-                        'descripcion' => 'Matenimiento y reparación de computadoras.',
+                        'descripcion' => 'Diagnóstico, Mantenimiento y reparación de computadoras.',
                         'sla'         => 'MEDIA',
                         'solicitudes' => [
                             [
-                                'nombre' => 'Diagnóstico y reparación de hardware',
+                                'nombre' => 'Diagnóstico de hardware',
                                 'descripcion' => 'Si tu equipo presenta fallas físicas como pantalla dañada, teclado que no responde, lentitud extrema u otros problemas de hardware, solicita aquí una revisión técnica para su reparación.',
                             ],
                             [
-                                'nombre' => 'Reparación  de hardware',
+                                'nombre' => 'Mantenimiento y reparación  de hardware',
+                                'descripcion' => 'Cuando tu equipo ha sido evaluado por TI y se determinó que no tiene reparación viable, solicita su sustitución por un equipo en condiciones adecuadas para continuar con tus labores.',
+                            ],
+                            [
+                                'nombre' => 'Reemplazo de componentes de hardware',
                                 'descripcion' => 'Cuando tu equipo ha sido evaluado por TI y se determinó que no tiene reparación viable, solicita su sustitución por un equipo en condiciones adecuadas para continuar con tus labores.',
                             ],
                         ],
                     ],
                     [
                         'nombre' => 'Gestión de Software',
-                        'descripcion' => '¿Necesitas un programa específico para tu trabajo o tienes uno que ya no utilizas? Este servicio cubre la instalación, actualización y desinstalación de aplicaciones en tu equipo institucional, siempre dentro del catálogo de software autorizado por la municipalidad.',
+                        'descripcion' => 'Instalación, actualización, activación y desinstalación de software',
                         'sla'         => 'BAJA',
                         'solicitudes' => [
                             [
-                                'nombre' => 'Instalación de software autorizado',
+                                'nombre' => 'Instalación de software',
                                 'descripcion' => 'Solicita la instalación de un programa o aplicación que necesitas para realizar tus funciones. El software debe estar dentro del listado de aplicaciones aprobadas por la institución.',
                             ],
                             [
-                                'nombre' => 'Actualización de software existente',
+                                'nombre' => 'Actualización de software',
+                                'descripcion' => 'Si tienes una aplicación desactualizada que está generando errores o incompatibilidades, solicita aquí su actualización a la versión más reciente disponible.',
+                            ],
+                            [
+                                'nombre' => 'Activación de software',
                                 'descripcion' => 'Si tienes una aplicación desactualizada que está generando errores o incompatibilidades, solicita aquí su actualización a la versión más reciente disponible.',
                             ],
                             [
@@ -108,13 +112,11 @@ class ServiciosSeeder extends Seeder
                 ],
             ],
 
-            // ────────────────────────────────────────────────────────────────
-            // 2. COMUNICACIÓN
-            // ────────────────────────────────────────────────────────────────
+
             [
                 'categoria' => [
                     'nombre' => 'Comunicación',
-                    'descripcion' => 'Engloba los servicios que te permiten comunicarte con tus compañeros y otras entidades: correo institucional, videollamadas, teléfono interno y la intranet municipal. Si tienes problemas para enviar correos, unirte a una reunión virtual o comunicarte por teléfono IP, aquí encuentras el servicio que necesitas.',
+                    'descripcion' => '',
                 ],
                 'servicios' => [
                     [
@@ -130,25 +132,6 @@ class ServiciosSeeder extends Seeder
                                 'nombre' => 'Baja o desactivación de cuenta de correo',
                                 'descripcion' => 'Cuando un colaborador se retira de la institución o cambia de función, solicita aquí la desactivación de su cuenta de correo para proteger la información institucional.',
                             ],
-                            [
-                                'nombre' => 'Recuperación de correos eliminados',
-                                'descripcion' => 'Si eliminaste por error correos importantes, solicita su recuperación. Ten en cuenta que la restauración depende del tiempo transcurrido desde la eliminación y las políticas de respaldo vigentes.',
-                            ],
-                        ],
-                    ],
-                    [
-                        'nombre' => 'Videoconferencia',
-                        'descripcion' => '¿Necesitas participar en reuniones virtuales con otras áreas, entidades del Estado o proveedores? Este servicio te proporciona acceso a las plataformas de videoconferencia institucionales y soporte técnico para que tus reuniones se realicen sin inconvenientes.',
-                        'sla'         => 'MEDIA',
-                        'solicitudes' => [
-                            [
-                                'nombre' => 'Habilitación de acceso a plataforma de videoconferencia',
-                                'descripcion' => 'Solicita el acceso o la licencia necesaria para usar la plataforma de videoconferencia institucional (Zoom, Teams u otra). Indica si necesitas solo participar en reuniones o también organizarlas.',
-                            ],
-                            [
-                                'nombre' => 'Soporte técnico durante sesión',
-                                'descripcion' => 'Si tienes problemas de audio, video o conexión durante una reunión virtual importante, solicita asistencia técnica inmediata. Indica la fecha y hora de la reunión para coordinar el apoyo oportuno.',
-                            ],
                         ],
                     ],
                     [
@@ -157,16 +140,12 @@ class ServiciosSeeder extends Seeder
                         'sla'         => 'MEDIA',
                         'solicitudes' => [
                             [
-                                'nombre' => 'Asignación de interno telefónico',
+                                'nombre' => 'Instalación y configuración de Anexo telefónico',
                                 'descripcion' => 'Solicita la asignación de un número de interno para comunicación telefónica dentro de la municipalidad. Indica tu nombre, área y si requieres teléfono físico o softphone en tu equipo.',
                             ],
                             [
-                                'nombre' => 'Configuración de dispositivo VoIP',
-                                'descripcion' => 'Si tienes un teléfono IP que no está configurado, dejó de funcionar o fue reasignado a otro usuario, solicita aquí su configuración para restablecer las comunicaciones.',
-                            ],
-                            [
-                                'nombre' => 'Reporte de falla en línea IP',
-                                'descripcion' => 'Reporta aquí si tu teléfono IP no tiene tono, no puede realizar o recibir llamadas, o presenta cualquier otro problema que interrumpa la comunicación interna de tu área.',
+                                'nombre' => 'Desinstalación de Anexo telefónico',
+                                'descripcion' => 'Solicita la asignación de un número de interno para comunicación telefónica dentro de la municipalidad. Indica tu nombre, área y si requieres teléfono físico o softphone en tu equipo.',
                             ],
                         ],
                     ],
@@ -175,6 +154,10 @@ class ServiciosSeeder extends Seeder
                         'descripcion' => 'La intranet es el portal interno de la municipalidad donde encontrarás noticias institucionales, documentos, formularios y herramientas para el trabajo diario. Solicita acceso o reporta problemas de navegación desde aquí.',
                         'sla'         => 'BAJA',
                         'solicitudes' => [
+                            [
+                                'nombre' => 'Habilitación de acceso a la intranet',
+                                'descripcion' => 'Solicita el acceso al portal de intranet institucional para consultar información, descargar documentos y usar las herramientas disponibles para el personal de la municipalidad.',
+                            ],
                             [
                                 'nombre' => 'Habilitación de acceso a la intranet',
                                 'descripcion' => 'Solicita el acceso al portal de intranet institucional para consultar información, descargar documentos y usar las herramientas disponibles para el personal de la municipalidad.',
