@@ -117,30 +117,5 @@ const user = page.props.auth?.user;
         </nav>
     </div>
 
-    <!-- Usuario -->
-    <div class="pt-2 pb-4 mt-2 space-y-1" :class="collapsed ? 'px-1' : 'px-2'">
-
-        <Link :href="route('perfil')"
-              :class="[
-                route().current('perfil') ? 'bg-blue-100 text-blue-700 border border-blue-100 ' : 'border border-gray-200 text-gray-700 hover:bg-gray-200 ',
-                collapsed ? ' justify-center py-3' : ' py-2 ' ,
-                ' group flex items-center text-sm px-4  font-medium rounded-[4px] '
-            ]"
-              :title="collapsed ? 'Mi Perfil' : ''">
-            <i class="fa-regular fa-user" :class="collapsed ? ' ' : 'mr-1.5'"></i>
-            <div v-if="!collapsed" class=" truncate ">
-                {{ user?.usuario }}
-            </div>
-        </Link>
-        <Link :href="route('logout')" method="post" as="button"
-              :class="[
-                'w-full font-medium text-sm text-white bg-red-500 border border-red-200 hover:bg-red-600 hover:text-red-100 transition flex items-center justify-center rounded-[4px] px-4',
-                collapsed ? 'justify-center py-3 ' : ' py-2.5 gap-1.5'
-            ]"
-              :title="collapsed ? 'Cerrar Sesión' : ''">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span v-if="!collapsed">Cerrar Sesión</span>
-        </Link>
-    </div>
 </template>
 

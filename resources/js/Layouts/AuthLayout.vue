@@ -2,6 +2,7 @@
 import {ref, watch} from 'vue';
 import Siderbar from "@/Layouts/Siderbar.vue";
 import {Dialog, DialogPanel, TransitionChild, TransitionRoot} from "@headlessui/vue";
+import Dropdown from "@/Components/Dropdown.vue";
 
 const sidebarOpen = ref(false);
 const collapsed = ref(localStorage.getItem('sidebar-collapsed') === 'true');
@@ -85,7 +86,31 @@ watch(collapsed, (val) => {
                         </h2>
                     </div>
                 </div>
+                <div class="flex items-center justify-end px-2 sm:px-6">
+                    <Dropdown width="48">
+                        <template #trigger>
+                            {{ $page.props.auth.user.nombres }} ({{ $page.props.auth.user.dni }})
+                        </template>
+                        <template #content>
+                            <Link :href="route('perfil')"
+                                  class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-500 hover:bg-blue-100 hover:text-blue-500 focus:outline-none focus:bg-blue-200 transition duration-150 ease-in-out group cursor-pointer">
+                                <i class="fa-solid fa-user mr-1 text-xs text-gray-500 group-hover:text-blue-500"></i>
+                                Mi Perfil
+                            </Link>
+
+                            <Link :href="route('logout')" method="post" as="button"
+                                  class="block w-full px-4 py-2 text-start text-sm leading-5 text-red-500 hover:bg-red-100 hover:text-red-500 focus:outline-none focus:bg-red-200 transition duration-150 ease-in-out group cursor-pointer">
+                                <i class="fa-solid fa-lock mr-1 text-xs text-red-500 group-hover:text-red-500 "></i>
+                                Cerrar Sesión
+                            </Link>
+
+                        </template>
+                    </Dropdown>
+                </div>
+
             </div>
+
+
             <main class="py-2 sm:py-6 px-2 sm:px-6">
                 <slot/>
             </main>
